@@ -1,6 +1,11 @@
 package compositeobject;
 
-public abstract class AtomicObject {
+import java.util.List;
+
+import burlap.mdp.core.oo.state.ObjectInstance;
+import burlap.mdp.core.state.State;
+
+public class AtomicObject implements ObjectInstance {
 	
 	protected String className;
 	protected int x;
@@ -29,6 +34,42 @@ public abstract class AtomicObject {
 	public String getClassName()
 	{
 		return className;
+	}
+
+	@Override
+	public List<Object> variableKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object get(Object variableKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public State copy() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String className() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String name() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ObjectInstance copyWithName(String objectName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
