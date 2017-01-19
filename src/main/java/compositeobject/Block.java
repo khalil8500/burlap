@@ -4,15 +4,19 @@ public class Block extends AtomicObject{
 	
 	public Block()
 	{
-		x = -1;
-		y = -1;
+		super();
 		className = "Block";
 	}
 	
 	public Block(int x, int y)
 	{
-		this.x = x;
-		this.y = y;
+		super(x, y);
+		className = "Block";
+	}
+	
+	public Block(int x, int y, String name)
+	{
+		super(x, y, name);
 		className = "Block";
 	}
 	

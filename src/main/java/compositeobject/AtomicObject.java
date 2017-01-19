@@ -1,16 +1,37 @@
 package compositeobject;
 
+import java.util.Arrays;
 import java.util.List;
 
 import burlap.mdp.core.oo.state.ObjectInstance;
 import burlap.mdp.core.state.State;
 
-public class AtomicObject implements ObjectInstance, Comparable{
+public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 	
 	protected String className;
+	protected String name;
 	protected int x;
 	protected int y;
 	
+	protected final static List<Object> keys = Arrays.<Object>asList(CompObjDomain.VAR_X, CompObjDomain.VAR_Y);
+	
+	public AtomicObject()
+	{
+		className = "object";
+	}
+	
+	public AtomicObject(int x, int y)
+	{
+		this();
+		this.x = x;
+		this.y = y;
+	}
+	
+	public AtomicObject(int x, int y, String name)
+	{
+		this(x, y);
+		this.name = name;
+	}
 	public void setX(int val)
 	{
 		x = val;
@@ -23,43 +44,48 @@ public class AtomicObject implements ObjectInstance, Comparable{
 
 	@Override
 	public List<Object> variableKeys() {
-		// TODO Auto-generated method stub
-		return null;
+		return keys;
 	}
 
 	@Override
 	public Object get(Object variableKey) {
-		// TODO Auto-generated method stub
-		return null;
+		if(!(variableKey instanceof String)){
+			throw new RuntimeException("GridAgent variable key must be a string");
+		}
+
+		String key = (String)variableKey;
+		if(key.equals(CompObjDomain.VAR_X)){
+			return x;
+		}
+		else if(key.equals(CompObjDomain.VAR_Y)){
+			return y;
+		}
+
+		throw new RuntimeException("Unknown key " + key);
 	}
 
 	@Override
-	public State copy() {
-		// TODO Auto-generated method stub
-		return null;
+	public AtomicObject copy() {
+		return new AtomicObject(x, y);
 	}
 
 	@Override
 	public String className() {
-		// TODO Auto-generated method stub
 		return className;
 	}
 
 	@Override
 	public String name() {
-		// TODO Auto-generated method stub
-		return null;
+		return name;
 	}
 
 	@Override
 	public ObjectInstance copyWithName(String objectName) {
-		// TODO Auto-generated method stub
-		return null;
+		return new AtomicObject(x, y, objectName);
 	}
 
 	@Override
-	public int compareTo(Object obj) {
-		AtomicObject a = (AtomicObject)obj;
+	public int compareTo(AtomicObject a) {
 		if((Integer)a.get(CompObjDomain.VAR_X) != this.x)
 			return ((Integer)x).compareTo((Integer)a.get(CompObjDomain.VAR_X));
 		else
