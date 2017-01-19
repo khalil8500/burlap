@@ -5,21 +5,11 @@ import java.util.List;
 import burlap.mdp.core.oo.state.ObjectInstance;
 import burlap.mdp.core.state.State;
 
-public class AtomicObject implements ObjectInstance {
+public class AtomicObject implements ObjectInstance, Comparable{
 	
 	protected String className;
 	protected int x;
 	protected int y;
-	
-	public int getX()
-	{
-		return x;
-	}
-	
-	public int getY()
-	{
-		return y;
-	}
 	
 	public void setX(int val)
 	{
@@ -29,11 +19,6 @@ public class AtomicObject implements ObjectInstance {
 	public void setY(int val)
 	{
 		y = val;
-	}
-	
-	public String getClassName()
-	{
-		return className;
 	}
 
 	@Override
@@ -57,7 +42,7 @@ public class AtomicObject implements ObjectInstance {
 	@Override
 	public String className() {
 		// TODO Auto-generated method stub
-		return null;
+		return className;
 	}
 
 	@Override
@@ -70,6 +55,15 @@ public class AtomicObject implements ObjectInstance {
 	public ObjectInstance copyWithName(String objectName) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int compareTo(Object obj) {
+		AtomicObject a = (AtomicObject)obj;
+		if((Integer)a.get(CompObjDomain.VAR_X) != this.x)
+			return ((Integer)x).compareTo((Integer)a.get(CompObjDomain.VAR_X));
+		else
+			return ((Integer)y).compareTo((Integer)a.get(CompObjDomain.VAR_Y));
 	}
 
 }

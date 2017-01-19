@@ -5,21 +5,21 @@ import java.util.List;
 
 public class MapToWallComp {
 	
-	public WallComp Map(List<AtomicObject> components)
+	public Wall Map(List<AtomicObject> components)
 	{
 		int startX, startY, endX, endY;
 		List<AtomicObject> doors = new ArrayList<AtomicObject>();
 		startX = startY = endX = endY = -1;
 		for(AtomicObject a: components)
 		{
-			int x = a.getX();
-			int y = a.getY();
+			int x = (Integer) a.get(CompObjDomain.VAR_X);
+			int y = (Integer) a.get(CompObjDomain.VAR_Y);
 			if(startX == -1)
 			{
 				startX = x;
-				startY = x;
+				startY = y;
 				endX = x;
-				endY = x;
+				endY = y;
 			}
 			else{
 				if(startX == x)
@@ -49,12 +49,12 @@ public class MapToWallComp {
 				}
 			}
 			
-			if(a.getClassName() == "Door")
+			if(a.className() == "Door")
 			{
 				doors.add(a);
 			}
 		}
-		return new WallComp(startX, startY, endX, endY, doors);
+		return new Wall(startX, startY, endX, endY, doors);
 	}
 
 }
