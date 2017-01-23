@@ -5,7 +5,8 @@ public class Door extends AtomicObject{
 	public Door()
 	{
 		super();
-		className = "Door";
+		//className = "Door";
+		type = 5;
 	}
 	
 	public Door(int x, int y)

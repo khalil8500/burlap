@@ -1,5 +1,7 @@
 package compositeobject;
 
+import static burlap.domain.singleagent.gridworld.GridWorldDomain.VAR_TYPE;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,6 +12,7 @@ public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 	
 	protected String className;
 	protected String name;
+	public int type;
 	protected int x;
 	protected int y;
 	
@@ -31,6 +34,12 @@ public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 	{
 		this(x, y);
 		this.name = name;
+	}
+	
+	public AtomicObject(int x, int y, String name, int type)
+	{
+		this(x, y, name);
+		this.type = type;
 	}
 	public void setX(int val)
 	{
@@ -60,13 +69,16 @@ public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 		else if(key.equals(CompObjDomain.VAR_Y)){
 			return y;
 		}
+		else if(key.equals(VAR_TYPE)){
+			return type;
+		}
 
 		throw new RuntimeException("Unknown key " + key);
 	}
 
 	@Override
 	public AtomicObject copy() {
-		return new AtomicObject(x, y);
+		return new AtomicObject(x, y, null, type);
 	}
 
 	@Override
@@ -80,8 +92,8 @@ public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 	}
 
 	@Override
-	public ObjectInstance copyWithName(String objectName) {
-		return new AtomicObject(x, y, objectName);
+	public AtomicObject copyWithName(String objectName) {
+		return new AtomicObject(x, y, objectName, type);
 	}
 
 	@Override

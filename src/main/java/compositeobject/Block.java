@@ -5,7 +5,8 @@ public class Block extends AtomicObject{
 	public Block()
 	{
 		super();
-		className = "Block";
+		//className = "Block";
+		type = 9;
 	}
 	
 	public Block(int x, int y)

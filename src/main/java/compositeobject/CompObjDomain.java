@@ -4,14 +4,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
+import burlap.debugtools.RandomFactory;
+import burlap.domain.singleagent.gridworld.GridWorldDomain.GridWorldModel;
+import burlap.domain.singleagent.gridworld.state.GridAgent;
+import burlap.domain.singleagent.gridworld.state.GridLocation;
+import burlap.domain.singleagent.gridworld.state.GridWorldState;
 import burlap.mdp.auxiliary.DomainGenerator;
+import burlap.mdp.auxiliary.common.NullTermination;
 import burlap.mdp.core.Domain;
+import burlap.mdp.core.StateTransitionProb;
+import burlap.mdp.core.TerminalFunction;
+import burlap.mdp.core.action.Action;
 import burlap.mdp.core.action.UniversalActionType;
 import burlap.mdp.core.oo.OODomain;
 import burlap.mdp.core.oo.propositional.PropositionalFunction;
 import burlap.mdp.core.oo.state.OOState;
 import burlap.mdp.core.oo.state.ObjectInstance;
+import burlap.mdp.core.state.State;
+import burlap.mdp.singleagent.common.UniformCostRF;
+import burlap.mdp.singleagent.model.FactoredModel;
+import burlap.mdp.singleagent.model.RewardFunction;
+import burlap.mdp.singleagent.model.statemodel.FullStateModel;
 import burlap.mdp.singleagent.oo.OOSADomain;
 
 public class CompObjDomain implements DomainGenerator {
@@ -20,9 +35,11 @@ public class CompObjDomain implements DomainGenerator {
 	
 	public static final String VAR_Y = "y";
 	
-	public static final String CLASS_AGENT = "agent";
+	public static final String VAR_TYPE = "type";
 	
-	public static final String CLASS_ATOMICOBJECT = "atomic object";
+	public static final String CLASS_AGENT = "Comp Obj Agent";
+	
+	public static final String CLASS_ATOMICOBJECT = "Atomic Object";
 	
 	/**
 	 * Constant for the name of the north action
@@ -58,42 +75,106 @@ public class CompObjDomain implements DomainGenerator {
 	
 	protected int width;
 	
-	protected String [][] map; 
+	protected int[][] map; 
+	
+	protected double[][] transitionDynamics;
+
+
+	protected RewardFunction rf;
+	protected TerminalFunction tf;
 	
 	public CompObjDomain(int height, int width)
 	{
 		this.height = height;
 		this.width = width;
+		this.setDeterministicTransitionDynamics();
 		makeEmptyMap();
 	}
 	
-	public CompObjDomain(String [][] map)
+	public CompObjDomain(int [][] map)
 	{
 		height = map.length;
 		width = map[0].length;
 		this.map = map.clone();
+		this.setDeterministicTransitionDynamics();
 	}
 	
 	public void makeEmptyMap()
 	{
-		this.map = new String[height][width];
+		this.map = new int[height][width];
 		for(int i = 0;i < height;i++)
 		{
 			for(int j = 0;j < width;j++)
 			{
-				map[i][j] = "Empty";
+				map[i][j] = 0;
 			}
 		}
 	}
 	
-	public String [][] getMap(){
-		String [][] cmap = new String[this.map.length][this.map[0].length];
+	public int [][] getMap(){
+		int [][] cmap = new int[this.map.length][this.map[0].length];
 		for(int i = 0; i < this.map.length; i++){
 			for(int j = 0; j < this.map[0].length; j++){
 				cmap[i][j] = this.map[i][j];
 			}
 		}
 		return cmap;
+	}
+	
+	public void setMap(int [][] map){
+		this.width = map.length;
+		this.height = map[0].length;
+		this.map = map.clone();
+	}
+	
+	public void setDeterministicTransitionDynamics(){
+		int na = 6;
+		transitionDynamics = new double[na][na];
+		for(int i = 0; i < na; i++){
+			for(int j = 0; j < na; j++){
+				if(i != j){
+					transitionDynamics[i][j] = 0.;
+				}
+				else{
+					transitionDynamics[i][j] = 1.;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Sets the domain to use probabilistic transitions. Agent will move in the intended direction with probability probSucceed. Agent
+	 * will move in a random direction with probability 1 - probSucceed
+	 * @param probSucceed probability to move the in intended direction
+	 */
+	public void setProbSucceedTransitionDynamics(double probSucceed){
+		int na = 4;
+		double pAlt = (1.-probSucceed)/3.;
+		transitionDynamics = new double[na][na];
+		for(int i = 0; i < na; i++){
+			for(int j = 0; j < na; j++){
+				if(i != j){
+					transitionDynamics[i][j] = pAlt;
+				}
+				else{
+					transitionDynamics[i][j] = probSucceed;
+				}
+			}
+		}
+	}
+	
+	public void setTransitionDynamics(double [][] transitionDynamics){
+		this.transitionDynamics = transitionDynamics.clone();
+	}
+
+	public double [][] getTransitionDynamics(){
+		double [][] copy = new double[transitionDynamics.length][transitionDynamics[0].length];
+		for(int i = 0; i < transitionDynamics.length; i++){
+			for(int j = 0; j < transitionDynamics[0].length; j++){
+				copy[i][j] = transitionDynamics[i][j];
+			}
+		}
+		return copy;
 	}
 	
 
@@ -113,6 +194,22 @@ public class CompObjDomain implements DomainGenerator {
 		return this.height;
 	}
 	
+	public RewardFunction getRf() {
+		return rf;
+	}
+
+	public void setRf(RewardFunction rf) {
+		this.rf = rf;
+	}
+
+	public TerminalFunction getTf() {
+		return tf;
+	}
+
+	public void setTf(TerminalFunction tf) {
+		this.tf = tf;
+	}
+	
 	public List<PropositionalFunction> generatePfs()
 	{
 		List<PropositionalFunction> pfs = Arrays.asList(
@@ -127,7 +224,24 @@ public class CompObjDomain implements DomainGenerator {
 	public OOSADomain generateDomain() {
 		OOSADomain domain = new OOSADomain();
 
-		String [][] cmap = this.getMap();
+		int [][] cmap = this.getMap();
+		
+		domain.addStateClass(CLASS_AGENT, GridAgent.class).addStateClass(CLASS_ATOMICOBJECT, GridLocation.class);
+
+		GridWorldModel smodel = new GridWorldModel(cmap, getTransitionDynamics());
+		RewardFunction rf = this.rf;
+		TerminalFunction tf = this.tf;
+
+		if(rf == null){
+			rf = new UniformCostRF();
+		}
+		if(tf == null){
+			tf = new NullTermination();
+		}
+
+
+		FactoredModel model = new FactoredModel(smodel, rf, tf);
+		domain.setModel(model);
 		
 		domain.addActionTypes(
 				new UniversalActionType(ACTION_NORTH),
@@ -141,6 +255,208 @@ public class CompObjDomain implements DomainGenerator {
 		
 		return domain;
 	}
+	
+	protected static int [] movementDirectionFromIndex(int i){
+
+		int [] result = null;
+
+		switch (i) {
+			case 0:
+				result = new int[]{0,1};
+				break;
+
+			case 1:
+				result = new int[]{0,-1};
+				break;
+
+			case 2:
+				result = new int[]{1,0};
+				break;
+
+			case 3:
+				result = new int[]{-1,0};
+				break;
+
+			default:
+				break;
+		}
+
+		return result;
+	}
+	
+	public static class GridWorldModel implements FullStateModel{
+
+
+		/**
+		 * The map of the world
+		 */
+		int [][] map;
+
+
+		/**
+		 * Matrix specifying the transition dynamics in terms of movement directions. The first index
+		 * indicates the action direction attempted (ordered north, south, east, west) the second index
+		 * indicates the actual resulting direction the agent will go (assuming there is no wall in the way).
+		 * The value is the probability of that outcome. The existence of walls does not affect the probability
+		 * of the direction the agent will actually go, but if a wall is in the way, it will affect the outcome.
+		 * For instance, if the agent selects north, but there is a 0.2 probability of actually going east and
+		 * there is a wall to the east, then with 0.2 probability, the agent will stay in place.
+		 */
+		protected double[][] transitionDynamics;
+
+		protected Random rand = RandomFactory.getMapped(0);
+
+
+		public GridWorldModel(int[][] map, double[][] transitionDynamics) {
+			this.map = map;
+			this.transitionDynamics = transitionDynamics;
+		}
+
+		@Override
+		public List<StateTransitionProb> stateTransitions(State s, Action a) {
+
+			double [] directionProbs = transitionDynamics[actionInd(a.actionName())];
+
+			List <StateTransitionProb> transitions = new ArrayList<StateTransitionProb>();
+			for(int i = 0; i < directionProbs.length; i++){
+				double p = directionProbs[i];
+				if(p == 0.){
+					continue; //cannot transition in this direction
+				}
+				State ns = s.copy();
+				int [] dcomps = movementDirectionFromIndex(i);
+				ns = move(ns, dcomps[0], dcomps[1]);
+
+				//make sure this direction doesn't actually stay in the same place and replicate another no-op
+				boolean isNew = true;
+				for(StateTransitionProb tp : transitions){
+					if(tp.s.equals(ns)){
+						isNew = false;
+						tp.p += p;
+						break;
+					}
+				}
+
+				if(isNew){
+					StateTransitionProb tp = new StateTransitionProb(ns, p);
+					transitions.add(tp);
+				}
+
+
+			}
+
+
+			return transitions;
+		}
+
+		@Override
+		public State sample(State s, Action a) {
+
+			s = s.copy();
+
+			double [] actionProbs = transitionDynamics[actionInd(a.actionName())];
+			double roll = rand.nextDouble();
+			double curSum = 0.;
+			int dir = 0;
+			for(int i = 0; i < actionProbs.length; i++){
+				curSum += actionProbs[i];
+				if(roll < curSum){
+					dir = i;
+					break;
+				}
+			}
+			
+			if(actionInd(a.actionName()) < 4){
+				int [] dcomps = movementDirectionFromIndex(dir);
+				return move(s, dcomps[0], dcomps[1]);
+			}
+			else
+			{
+				return move(s, a);
+			}
+
+		}
+
+		/**
+		 * Attempts to move the agent into the given position, taking into account walls and blocks
+		 * @param s the current state
+		 * @param xd the attempted new X position of the agent
+		 * @param yd the attempted new Y position of the agent
+		 * @return input state s, after modification
+		 */
+		protected State move(State s, int xd, int yd){
+
+			CompObjState cos = (CompObjState)s;
+
+			int ax = cos.agent.x;
+			int ay = cos.agent.y;
+
+			int nx = ax+xd;
+			int ny = ay+yd;
+
+			//hit wall, so do not change position
+			if(nx < 0 || nx >= map.length || ny < 0 || ny >= map[0].length || map[nx][ny] == 1 ||
+					(xd > 0 && (map[ax][ay] == 3 || map[ax][ay] == 4)) || (xd < 0 && (map[nx][ny] == 3 || map[nx][ny] == 4)) ||
+					(yd > 0 && (map[ax][ay] == 2 || map[ax][ay] == 4)) || (yd < 0 && (map[nx][ny] == 2 || map[nx][ny] == 4)) ){
+				nx = ax;
+				ny = ay;
+			}
+
+			CompObjAgent nagent = cos.touchAgent();
+			nagent.x = nx;
+			nagent.y = ny;
+
+			return s;
+		}
+		
+		protected State move(State s, Action a)
+		{
+			CompObjState cos = (CompObjState)s;
+
+			int ax = cos.agent.x;
+			int ay = cos.agent.y;
+			
+			if(a.actionName().equals(ACTION_PLACEBLOCK))
+			{
+				Block newBlock = new Block(ax, ay, "Block " + ax + ", " +  ay);
+				cos.addObject(newBlock);
+			}
+			
+			else if(a.actionName().equals(ACTION_PLACEBLOCK))
+			{
+				Door newDoor = new Door(ax, ay, "Door " + ax + ", " +  ay);
+				cos.addObject(newDoor);
+			}
+			return cos;
+		}
+
+
+		protected int actionInd(String name){
+			if(name.equals(ACTION_NORTH)){
+				return 0;
+			}
+			else if(name.equals(ACTION_SOUTH)){
+				return 1;
+			}
+			else if(name.equals(ACTION_EAST)){
+				return 2;
+			}
+			else if(name.equals(ACTION_WEST)){
+				return 3;
+			}
+			else if(name.equals(ACTION_PLACEBLOCK))
+			{
+				return 4;
+			}
+			else if(name.equals(ACTION_PLACEDOOR))
+			{
+				return 5;
+			}
+			throw new RuntimeException("Unknown action " + name);
+		}
+
+	}
+	
 	public class AreBarriers extends PropositionalFunction
 	{		
 		public AreBarriers(String name, String[] parameterClasses) {
