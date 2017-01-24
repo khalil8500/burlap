@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import burlap.mdp.core.oo.propositional.PropositionalFunction;
 import burlap.mdp.core.oo.state.MutableOOState;
 import burlap.mdp.core.oo.state.OOStateUtilities;
 import burlap.mdp.core.oo.state.OOVariableKey;
@@ -82,10 +83,10 @@ public class CompObjState implements MutableOOState {
 
 	@Override
 	public List<ObjectInstance> objectsOfClass(String oclass) {
-		if(oclass.equals("agent")){
+		if(oclass.equals(CompObjDomain.CLASS_AGENT)){
 			return Arrays.<ObjectInstance>asList(agent);
 		}
-		else if(oclass.equals("Door") || oclass.equals("Wall")){
+		else if(oclass.equals(CompObjDomain.CLASS_ATOMICOBJECT) ){
 			return new ArrayList<ObjectInstance>(objects);
 		}
 		throw new RuntimeException("Unknown class type " + oclass);
@@ -230,6 +231,30 @@ public class CompObjState implements MutableOOState {
 	public String toString()
 	{
 		return OOStateUtilities.ooStateToString(this);
+	}
+	
+	public void checkForWalls(CompObjState s, int start, int end, ArrayList<AtomicObject> selection)
+	{
+		CompObjDomain temp = new CompObjDomain(1, 1);
+		List<PropositionalFunction> pfs = temp.generatePfs();
+		//List<ObjectInstance> objects = s.objectsOfClass(CompObjDomain.CLASS_ATOMICOBJECT);
+		for(int i = start;i < end; i++)
+		{
+			selection.add(objects.get(i));
+			agent.setSelection(selection);
+			checkForWalls(s, i + 1, end, selection);
+			//CompObjDomain.AreBarriers ar = new CompObjDomain.AreBarriers(CompObjDomain.PF_AreBarriers, new String[]{CompObjDomain.CLASS_AGENT});
+			if(pfs.get(0).isTrue(s, "agent"))
+			{
+				if(pfs.get(1).isTrue(s, "agent"))
+				{
+					if(pfs.get(2).isTrue(s, "agent"))
+					{
+						agent.map(selection);
+					}
+				}
+			}
+		}
 	}
 
 }

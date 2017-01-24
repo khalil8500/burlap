@@ -73,7 +73,7 @@ public class CompObjVisualizer {
 			
 			r.addStatePainter(new MapPainter(map));
 			OOStatePainter oopainter = new OOStatePainter();
-			oopainter.addObjectClassPainter(CompObjDomain.CLASS_ATOMICOBJECT, new LocationPainter(map));
+			oopainter.addObjectClassPainter(CompObjDomain.CLASS_ATOMICOBJECT, new AtomicObjectPainter(map));
 			oopainter.addObjectClassPainter(CompObjDomain.CLASS_AGENT, new CellPainter(1, Color.gray, map));
 			r.addStatePainter(oopainter);
 			
@@ -90,9 +90,9 @@ public class CompObjVisualizer {
 			
 			StateRenderLayer r = new StateRenderLayer();
 			
-			r.addStatePainter(new MapPainter(map));
+			//r.addStatePainter(new MapPainter(map));
 			OOStatePainter oopainter = new OOStatePainter();
-			oopainter.addObjectClassPainter(CompObjDomain.CLASS_ATOMICOBJECT, new LocationPainter(map));
+			oopainter.addObjectClassPainter(CompObjDomain.CLASS_ATOMICOBJECT, new AtomicObjectPainter(map));
 			oopainter.addObjectClassPainter(CompObjDomain.CLASS_AGENT, new CellPainter(1, Color.gray, map));
 			r.addStatePainter(oopainter);
 			
@@ -263,7 +263,7 @@ public class CompObjVisualizer {
 		 * @author James MacGlashan
 		 *
 		 */
-		public static class LocationPainter implements ObjectPainter{
+		public static class AtomicObjectPainter implements ObjectPainter{
 
 			protected List<Color>	baseColors;
 			protected int			dwidth;
@@ -275,7 +275,7 @@ public class CompObjVisualizer {
 			 * Initializes painter
 			 * @param map the wall map matrix where 1s indicate a wall in that cell and 0s indicate it is clear of walls
 			 */
-			public LocationPainter(int [][] map) {
+			public AtomicObjectPainter(int [][] map) {
 				this.dwidth = map.length;
 				this.dheight = map[0].length;
 				this.map = map;

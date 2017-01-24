@@ -1,5 +1,6 @@
 package compositeobject;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,12 +8,9 @@ import java.util.List;
 import java.util.Random;
 
 import burlap.debugtools.RandomFactory;
-import burlap.domain.singleagent.gridworld.GridWorldDomain.GridWorldModel;
-import burlap.domain.singleagent.gridworld.state.GridAgent;
-import burlap.domain.singleagent.gridworld.state.GridLocation;
-import burlap.domain.singleagent.gridworld.state.GridWorldState;
 import burlap.mdp.auxiliary.DomainGenerator;
 import burlap.mdp.auxiliary.common.NullTermination;
+import burlap.mdp.auxiliary.common.SinglePFTF;
 import burlap.mdp.core.Domain;
 import burlap.mdp.core.StateTransitionProb;
 import burlap.mdp.core.TerminalFunction;
@@ -23,11 +21,16 @@ import burlap.mdp.core.oo.propositional.PropositionalFunction;
 import burlap.mdp.core.oo.state.OOState;
 import burlap.mdp.core.oo.state.ObjectInstance;
 import burlap.mdp.core.state.State;
+import burlap.mdp.singleagent.SADomain;
+import burlap.mdp.singleagent.common.SingleGoalPFRF;
 import burlap.mdp.singleagent.common.UniformCostRF;
 import burlap.mdp.singleagent.model.FactoredModel;
 import burlap.mdp.singleagent.model.RewardFunction;
 import burlap.mdp.singleagent.model.statemodel.FullStateModel;
 import burlap.mdp.singleagent.oo.OOSADomain;
+import burlap.shell.EnvironmentShell;
+import burlap.shell.visual.VisualExplorer;
+import burlap.visualizer.Visualizer;
 
 public class CompObjDomain implements DomainGenerator {
 
@@ -71,6 +74,8 @@ public class CompObjDomain implements DomainGenerator {
 	
 	public static final String PF_IsContiguous = "Is Contiguous";
 	
+	public static final String PF_hasSizeWall = "Has Size Wall";
+	
 	protected int height;
 	
 	protected int width;
@@ -78,7 +83,8 @@ public class CompObjDomain implements DomainGenerator {
 	protected int[][] map; 
 	
 	protected double[][] transitionDynamics;
-
+	
+	protected int desiredWallSize;
 
 	protected RewardFunction rf;
 	protected TerminalFunction tf;
@@ -215,29 +221,35 @@ public class CompObjDomain implements DomainGenerator {
 		List<PropositionalFunction> pfs = Arrays.asList(
 				new AreBarriers(PF_AreBarriers, new String[]{CLASS_AGENT}),
 				new isStraight(PF_IsStraight, new String[]{CLASS_AGENT}),
-				new isContiguous(PF_IsContiguous, new String[]{CLASS_AGENT})
+				new isContiguous(PF_IsContiguous, new String[]{CLASS_AGENT}),
+				new hasSizeWall(PF_hasSizeWall, new String[]{CLASS_AGENT, CLASS_ATOMICOBJECT}, desiredWallSize)
 				);
 		return pfs;
 	}
-	
+
 	@Override
 	public OOSADomain generateDomain() {
 		OOSADomain domain = new OOSADomain();
+		
+		desiredWallSize = 3;
+		
+		OODomain.Helper.addPfsToDomain(domain, this.generatePfs());
 
 		int [][] cmap = this.getMap();
 		
-		domain.addStateClass(CLASS_AGENT, GridAgent.class).addStateClass(CLASS_ATOMICOBJECT, GridLocation.class);
+		domain.addStateClass(CLASS_AGENT, CompObjAgent.class).addStateClass(CLASS_ATOMICOBJECT, AtomicObject.class);
 
 		GridWorldModel smodel = new GridWorldModel(cmap, getTransitionDynamics());
-		RewardFunction rf = this.rf;
-		TerminalFunction tf = this.tf;
+		
+		RewardFunction rf = new SingleGoalPFRF(domain.propFunction(PF_hasSizeWall), 1000, -1);
+		TerminalFunction tf = new SinglePFTF(domain.propFunction(PF_hasSizeWall));
 
-		if(rf == null){
+		/*if(rf == null){
 			rf = new UniformCostRF();
 		}
 		if(tf == null){
 			tf = new NullTermination();
-		}
+		}*/
 
 
 		FactoredModel model = new FactoredModel(smodel, rf, tf);
@@ -250,8 +262,6 @@ public class CompObjDomain implements DomainGenerator {
 				new UniversalActionType(ACTION_WEST),
 				new UniversalActionType(ACTION_PLACEBLOCK),
 				new UniversalActionType(ACTION_PLACEDOOR));
-		
-		OODomain.Helper.addPfsToDomain(domain, this.generatePfs());
 		
 		return domain;
 	}
@@ -405,7 +415,7 @@ public class CompObjDomain implements DomainGenerator {
 			CompObjAgent nagent = cos.touchAgent();
 			nagent.x = nx;
 			nagent.y = ny;
-
+			
 			return s;
 		}
 		
@@ -418,18 +428,26 @@ public class CompObjDomain implements DomainGenerator {
 			
 			if(a.actionName().equals(ACTION_PLACEBLOCK))
 			{
+				if(map[ax][ay] == 1)
+					return cos;
 				Block newBlock = new Block(ax, ay, "Block " + ax + ", " +  ay);
 				cos.addObject(newBlock);
+				map[ax][ay] = 1;
+				
+				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
-			
-			else if(a.actionName().equals(ACTION_PLACEBLOCK))
+			else if(a.actionName().equals(ACTION_PLACEDOOR))
 			{
+				if(map[ax][ay] == 1)
+					return cos;
 				Door newDoor = new Door(ax, ay, "Door " + ax + ", " +  ay);
 				cos.addObject(newDoor);
+				map[ax][ay] = 1;
+				
+				cos.checkForWalls(cos, 0, ((List<AtomicObject>) cos.get(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
 			return cos;
 		}
-
 
 		protected int actionInd(String name){
 			if(name.equals(ACTION_NORTH)){
@@ -466,10 +484,10 @@ public class CompObjDomain implements DomainGenerator {
 		@Override
 		public boolean isTrue(OOState s, String... params) {
 			ObjectInstance agent = s.object(params[0]);
-			ArrayList<AtomicObject> selection = (ArrayList<AtomicObject>) agent.get("selection");
+			ArrayList<AtomicObject> selection = (ArrayList<AtomicObject>) ((CompObjAgent) agent).getSelection();
 			for(AtomicObject a:selection)
 			{
-				if(a.className() != "Wall" || a.className() != "Door")
+				if(a.className() != "Atomic Object")
 					return false;
 			}
 			return true;
@@ -490,16 +508,34 @@ public class CompObjDomain implements DomainGenerator {
 			ArrayList<AtomicObject> selection = (ArrayList<AtomicObject>) agent.get("selection");
 			if(selection.size() <= 1)
 				return true;
-			double slope = Math.abs(((Double)selection.get(1).get(VAR_X) - (Double)selection.get(0).get(VAR_X))/((Double)selection.get(1).get(VAR_Y) - (Double)selection.get(0).get(VAR_Y)));
-			double initialX = (Double)selection.get(0).get(VAR_X);
-			double initialY = (Double)selection.get(0).get(VAR_Y);
+			//double slope = Math.abs(((Double)selection.get(1).get(VAR_X) - (Double)selection.get(0).get(VAR_X))/((Double)selection.get(1).get(VAR_Y) - (Double)selection.get(0).get(VAR_Y)));
+			double initialX = (Integer)selection.get(0).get(VAR_X);
+			double initialY = (Integer)selection.get(0).get(VAR_Y);
+			double dx = (Integer)selection.get(1).get(VAR_X) - initialX;
+			double dy = (Integer)selection.get(1).get(VAR_Y) - initialY;
 			for(AtomicObject a:selection)
 			{
-				if((Double)a.get(VAR_X) != initialX && (Double)a.get(VAR_Y) != initialY)
+				if((Integer)a.get(VAR_X) != initialX && (Integer)a.get(VAR_Y) != initialY)
 				{
-					double compSlope = Math.abs(((Double)a.get(VAR_X)-initialX)/((Double)a.get(VAR_Y)-initialY));
-					if(compSlope != slope)
-						return false;
+					double tempDx = (Integer)a.get(VAR_X)-initialX;
+					double tempDy = (Integer)a.get(VAR_Y)-initialY;
+					if(dx != 0)
+					{
+						double slope = Math.abs(dy/dx);
+						if(tempDx != 0)
+						{
+							double compSlope = Math.abs(tempDy/tempDx);
+							if(compSlope != slope)
+								return false;
+						}
+						else
+							return false;
+					}
+					else
+					{
+						if(tempDx != 0)
+							return false;
+					}
 				}
 			}
 			return true;
@@ -521,7 +557,7 @@ public class CompObjDomain implements DomainGenerator {
 			if(selection.size() <= 1)
 				return true;
 			Collections.sort(selection);
-			boolean checkX = (((Integer)selection.get(0).get(VAR_X) + 1) != (Integer)selection.get(1).get(VAR_X));
+			boolean checkX = (((Integer)selection.get(0).get(VAR_X) + 1) == (Integer)selection.get(1).get(VAR_X));
 			for(int i = 0; i < selection.size() - 1; i++)
 			{
 				if(checkX && ((Integer)selection.get(i).get(VAR_X) + 1) != (Integer)selection.get(i+1).get(VAR_X))
@@ -535,6 +571,77 @@ public class CompObjDomain implements DomainGenerator {
 			}
 			return true;
 		}
+	}
+	
+	public class hasSizeWall extends PropositionalFunction
+	{
+		int wallSize;
+
+		public hasSizeWall(String name, String[] parameterClasses, int size) {
+			super(name, parameterClasses);
+			wallSize = size;
+		}
+
+		@Override
+		public boolean isTrue(OOState s, String... params) {
+			ObjectInstance agent = s.object(params[0]);
+			List<Wall> walls = (List<Wall>) agent.get("Walls");
+			
+			for(Wall w: walls)
+			{
+				if(w.length() >= wallSize)
+					return true;
+			}
+			
+			return false;
+		}
+		
+		
+		
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		
+		CompObjDomain cod = new CompObjDomain(4, 4);
+		
+		SADomain d = cod.generateDomain();
+
+		CompObjState s = new CompObjState(new CompObjAgent(0, 0));
+		
+		int expMode = 1;
+		if(args.length > 0){
+			if(args[0].equals("v")){
+				expMode = 1;
+			}
+			else if(args[0].equals("t")){
+				expMode = 0;
+			}
+		}
+		
+		if(expMode == 0){
+
+			EnvironmentShell shell = new EnvironmentShell(d, s);
+			shell.start();
+			
+		}
+		else if(expMode == 1){
+			
+			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
+			VisualExplorer exp = new VisualExplorer(d, v, s);
+			
+			
+			exp.addKeyAction("w", ACTION_NORTH, "");
+			exp.addKeyAction("s", ACTION_SOUTH, "");
+			exp.addKeyAction("a", ACTION_WEST, "");
+			exp.addKeyAction("d", ACTION_EAST, "");
+			exp.addKeyAction("q", ACTION_PLACEBLOCK, "");
+			exp.addKeyAction("e", ACTION_PLACEDOOR, "");
+			
+			exp.initGUI();
+		}
+		
 	}
 
 }

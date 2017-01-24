@@ -6,19 +6,21 @@ public class Door extends AtomicObject{
 	{
 		super();
 		//className = "Door";
-		type = 5;
+		type = 1;
 	}
 	
 	public Door(int x, int y)
 	{
 		super(x, y);
-		className = "Door";
+		//className = "Door";
+		type = 1;
 	}
 	
 	public Door(int x, int y, String name)
 	{
 		super(x, y, name);
-		className = "Door";
+		//className = "Door";
+		type = 1;
 	}
 
 }

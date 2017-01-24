@@ -6,7 +6,7 @@ import java.util.List;
 public class Wall {
 	
 	private List<AtomicObject> doors = new ArrayList<AtomicObject>();
-	private int startX, startY, endX, endY;
+	private int startX, startY, endX, endY, length;
 	
 	public Wall()
 	{
@@ -16,21 +16,23 @@ public class Wall {
 		endY = -1;
 	}
 	
-	public Wall(int startX, int startY, int endX, int endY)
+	public Wall(int startX, int startY, int endX, int endY, int length)
 	{
 		this.startX = startX;
 		this.startY = startY;
 		this.endX = endX;
 		this.endY = endY;
+		this.length = length;
 	}
 	
-	public Wall(int startX, int startY, int endX, int endY, List<AtomicObject> doors)
+	public Wall(int startX, int startY, int endX, int endY, int length, List<AtomicObject> doors)
 	{
 		this.startX = startX;
 		this.startY = startY;
 		this.endX = endX;
 		this.endY = endY;
 		this.doors = doors;
+		this.length = length;
 	}
 	
 	public int getStartX()
@@ -51,6 +53,11 @@ public class Wall {
 	public int getEndY()
 	{
 		return endY;
+	}
+	
+	public int length()
+	{
+		return length;
 	}
 	
 	public List<AtomicObject> getDoors()
@@ -81,6 +88,15 @@ public class Wall {
 	public void setDoors(List<AtomicObject> doors)
 	{
 		this.doors = doors;
+	}
+	
+	public boolean equals(Object o)
+	{
+		Wall w = (Wall)o;
+		if(w.getStartX() == startX && w.getEndX() == endX 
+				&& w.getStartY() == startY && w.getEndY() == endY)
+			return true;
+		return false;
 	}
 
 }

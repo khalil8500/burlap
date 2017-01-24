@@ -5,7 +5,7 @@ import java.util.List;
 
 public class MapToWallComp {
 	
-	public Wall Map(List<AtomicObject> components)
+	public static Wall Map(List<AtomicObject> components)
 	{
 		int startX, startY, endX, endY;
 		List<AtomicObject> doors = new ArrayList<AtomicObject>();
@@ -54,7 +54,7 @@ public class MapToWallComp {
 				doors.add(a);
 			}
 		}
-		return new Wall(startX, startY, endX, endY, doors);
+		return new Wall(startX, startY, endX, endY, components.size(), doors);
 	}
 
 }

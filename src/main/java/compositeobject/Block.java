@@ -6,19 +6,21 @@ public class Block extends AtomicObject{
 	{
 		super();
 		//className = "Block";
-		type = 9;
+		type = 0;
 	}
 	
 	public Block(int x, int y)
 	{
 		super(x, y);
-		className = "Block";
+		//className = "Block";
+		type = 0;
 	}
 	
 	public Block(int x, int y, String name)
 	{
 		super(x, y, name);
-		className = "Block";
+		//className = "Block";
+		type = 0;
 	}
 	
 

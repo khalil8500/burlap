@@ -20,7 +20,7 @@ public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 	
 	public AtomicObject()
 	{
-		className = "object";
+		className = CompObjDomain.CLASS_ATOMICOBJECT;
 	}
 	
 	public AtomicObject(int x, int y)

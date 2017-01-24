@@ -30,6 +30,18 @@ public class CompObjAgent implements ObjectInstance{
 		this.y = y;
 	}
 	
+	public CompObjAgent(int x, int y, ArrayList<Wall> walls)
+	{
+		this(x,y);
+		this.walls = walls;
+	}
+	
+	public CompObjAgent(int x, int y, String name, ArrayList<Wall> walls)
+	{
+		this(x, y, name);
+		this.walls = walls;
+	}
+	
 	public CompObjAgent(int x, int y, String name)
 	{
 		this.x = x;
@@ -66,7 +78,7 @@ public class CompObjAgent implements ObjectInstance{
 
 	@Override
 	public CompObjAgent copy() {
-		return new CompObjAgent(x, y);
+		return new CompObjAgent(x, y, walls);
 	}
 
 	@Override
@@ -81,7 +93,7 @@ public class CompObjAgent implements ObjectInstance{
 
 	@Override
 	public CompObjAgent copyWithName(String objectName) {
-		return new CompObjAgent(x, y, name);
+		return new CompObjAgent(x, y, name, walls);
 	}
 	
 	public String getName() {
@@ -102,6 +114,11 @@ public class CompObjAgent implements ObjectInstance{
 		walls.clear();
 	}
 	
+	public ArrayList<AtomicObject> getSelection()
+	{
+		return selection;
+	}
+	
 	public void setSelection(ArrayList<AtomicObject> selection)
 	{
 		this.selection = selection;
@@ -110,6 +127,20 @@ public class CompObjAgent implements ObjectInstance{
 	@Override
 	public String toString() {
 		return OOStateUtilities.objectInstanceToString(this);
+	}
+	
+	public void map(List<AtomicObject> selection)
+	{
+
+		Wall addition =  MapToWallComp.Map(selection);
+		
+		for(Wall w:walls)
+		{
+			if(w.equals(addition))
+				return;
+		}
+		
+		walls.add(addition);
 	}
 
 }
