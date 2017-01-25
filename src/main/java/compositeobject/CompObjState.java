@@ -16,7 +16,7 @@ import burlap.mdp.core.state.StateUtilities;
 public class CompObjState implements MutableOOState {
 	
 	public CompObjAgent agent;
-	public List<AtomicObject> objects;
+	public ArrayList<AtomicObject> objects;
 	
 	public CompObjState()
 	{
@@ -35,11 +35,11 @@ public class CompObjState implements MutableOOState {
 			this.objects = new ArrayList<AtomicObject>();
 		}
 		else {
-			this.objects = Arrays.asList(objects);
+			this.objects = (ArrayList<AtomicObject>) Arrays.asList(objects);
 		}
 	}
 	
-	public CompObjState(CompObjAgent agent, List<AtomicObject> objects)
+	public CompObjState(CompObjAgent agent, ArrayList<AtomicObject> objects)
 	{
 		this.agent = agent;
 		this.objects = objects;
@@ -112,7 +112,7 @@ public class CompObjState implements MutableOOState {
 
 	@Override
 	public State copy() {
-		return new CompObjState(agent, objects);
+		return new CompObjState(agent.copy(), (ArrayList<AtomicObject>) objects.clone());
 	}
 
 	@Override
@@ -157,13 +157,13 @@ public class CompObjState implements MutableOOState {
 		return agent;
 	}
 
-	public List<AtomicObject> touchObjects(){
+	public ArrayList<AtomicObject> touchObjects(){
 		this.objects = new ArrayList<AtomicObject>(objects);
 		return objects;
 	}
 	
-	public List<AtomicObject> deepTouchObjects(){
-		List<AtomicObject> nlocs = new ArrayList<AtomicObject>(objects.size());
+	public ArrayList<AtomicObject> deepTouchObjects(){
+		ArrayList<AtomicObject> nlocs = new ArrayList<AtomicObject>(objects.size());
 		for(AtomicObject loc : objects){
 			nlocs.add(loc.copy());
 		}
@@ -254,6 +254,7 @@ public class CompObjState implements MutableOOState {
 					}
 				}
 			}
+			selection.remove(objects.get(i));
 		}
 	}
 

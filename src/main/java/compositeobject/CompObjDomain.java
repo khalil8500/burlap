@@ -7,6 +7,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import burlap.behavior.policy.Policy;
+import burlap.behavior.policy.PolicyUtils;
+import burlap.behavior.singleagent.Episode;
+import burlap.behavior.singleagent.MDPSolverInterface;
+import burlap.behavior.singleagent.auxiliary.EpisodeSequenceVisualizer;
+import burlap.behavior.singleagent.learning.LearningAgent;
+import burlap.behavior.singleagent.learning.tdmethods.QLearning;
+import burlap.behavior.singleagent.planning.Planner;
+import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
 import burlap.debugtools.RandomFactory;
 import burlap.mdp.auxiliary.DomainGenerator;
 import burlap.mdp.auxiliary.common.NullTermination;
@@ -24,12 +33,15 @@ import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.SADomain;
 import burlap.mdp.singleagent.common.SingleGoalPFRF;
 import burlap.mdp.singleagent.common.UniformCostRF;
+import burlap.mdp.singleagent.environment.SimulatedEnvironment;
 import burlap.mdp.singleagent.model.FactoredModel;
 import burlap.mdp.singleagent.model.RewardFunction;
 import burlap.mdp.singleagent.model.statemodel.FullStateModel;
 import burlap.mdp.singleagent.oo.OOSADomain;
 import burlap.shell.EnvironmentShell;
 import burlap.shell.visual.VisualExplorer;
+import burlap.statehashing.HashableStateFactory;
+import burlap.statehashing.simple.SimpleHashableStateFactory;
 import burlap.visualizer.Visualizer;
 
 public class CompObjDomain implements DomainGenerator {
@@ -222,7 +234,7 @@ public class CompObjDomain implements DomainGenerator {
 				new AreBarriers(PF_AreBarriers, new String[]{CLASS_AGENT}),
 				new isStraight(PF_IsStraight, new String[]{CLASS_AGENT}),
 				new isContiguous(PF_IsContiguous, new String[]{CLASS_AGENT}),
-				new hasSizeWall(PF_hasSizeWall, new String[]{CLASS_AGENT, CLASS_ATOMICOBJECT}, desiredWallSize)
+				new hasSizeWall(PF_hasSizeWall, new String[]{CLASS_AGENT}, desiredWallSize)
 				);
 		return pfs;
 	}
@@ -432,7 +444,7 @@ public class CompObjDomain implements DomainGenerator {
 					return cos;
 				Block newBlock = new Block(ax, ay, "Block " + ax + ", " +  ay);
 				cos.addObject(newBlock);
-				map[ax][ay] = 1;
+				//map[ax][ay] = 1;
 				
 				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
@@ -442,9 +454,9 @@ public class CompObjDomain implements DomainGenerator {
 					return cos;
 				Door newDoor = new Door(ax, ay, "Door " + ax + ", " +  ay);
 				cos.addObject(newDoor);
-				map[ax][ay] = 1;
+				//map[ax][ay] = 1;
 				
-				cos.checkForWalls(cos, 0, ((List<AtomicObject>) cos.get(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
+				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
 			return cos;
 		}
@@ -606,11 +618,14 @@ public class CompObjDomain implements DomainGenerator {
 		
 		CompObjDomain cod = new CompObjDomain(4, 4);
 		
+		String outputPath = "output/";
+		
 		SADomain d = cod.generateDomain();
+		
 
 		CompObjState s = new CompObjState(new CompObjAgent(0, 0));
 		
-		int expMode = 1;
+		int expMode = 0;
 		if(args.length > 0){
 			if(args[0].equals("v")){
 				expMode = 1;
@@ -620,17 +635,35 @@ public class CompObjDomain implements DomainGenerator {
 			}
 		}
 		
+		
+				
 		if(expMode == 0){
-
 			EnvironmentShell shell = new EnvironmentShell(d, s);
 			shell.start();
 			
+			SimulatedEnvironment env = new SimulatedEnvironment(d, s);
+			
+			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
+
+			LearningAgent agent = new QLearning(d, 0.5, hashingFactory, 0., 1.);
+
+			//run learning for 50 episodes
+			for(int i = 0; i < 50; i++){
+				Episode e = agent.runLearningEpisode(env);
+
+				e.write(outputPath + "ql_" + i);
+				System.out.println(i + ": " + e.maxTimeStep());
+
+				//reset environment for next learning episode
+				env.resetEnvironment();
+			}
+			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
+			new EpisodeSequenceVisualizer(v, d, outputPath);
+			
 		}
 		else if(expMode == 1){
-			
 			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
 			VisualExplorer exp = new VisualExplorer(d, v, s);
-			
 			
 			exp.addKeyAction("w", ACTION_NORTH, "");
 			exp.addKeyAction("s", ACTION_SOUTH, "");

@@ -17,7 +17,7 @@ public class ConstantStateGenerator implements StateGenerator {
 	 * @param src the source state of which to return copies
 	 */
 	public ConstantStateGenerator(State src){
-		this.src = src;
+		this.src = src.copy();
 	}
 	
 	@Override
