@@ -78,7 +78,12 @@ public class CompObjAgent implements ObjectInstance{
 
 	@Override
 	public CompObjAgent copy() {
-		return new CompObjAgent(x, y, (ArrayList<Wall>) walls.clone());
+		ArrayList<Wall> wallsCopy = new ArrayList<Wall>();
+		for(Wall w: walls)
+		{
+			wallsCopy.add(w.copy());
+		}
+		return new CompObjAgent(x, y, wallsCopy);
 	}
 
 	@Override
@@ -93,7 +98,12 @@ public class CompObjAgent implements ObjectInstance{
 
 	@Override
 	public CompObjAgent copyWithName(String objectName) {
-		return new CompObjAgent(x, y, name, (ArrayList<Wall>) walls.clone());
+		ArrayList<Wall> wallsCopy = new ArrayList<Wall>();
+		for(Wall w: walls)
+		{
+			wallsCopy.add(w.copy());
+		}
+		return new CompObjAgent(x, y, name, wallsCopy);
 	}
 	
 	public String getName() {

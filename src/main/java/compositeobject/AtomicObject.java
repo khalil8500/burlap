@@ -13,8 +13,7 @@ public class AtomicObject implements ObjectInstance, Comparable<AtomicObject>{
 	protected String className;
 	protected String name;
 	public int type;
-	protected int x;
-	protected int y;
+	public int x, y;
 	
 	protected final static List<Object> keys = Arrays.<Object>asList(CompObjDomain.VAR_X, CompObjDomain.VAR_Y);
 	

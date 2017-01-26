@@ -43,6 +43,7 @@ import burlap.shell.visual.VisualExplorer;
 import burlap.statehashing.HashableStateFactory;
 import burlap.statehashing.simple.SimpleHashableStateFactory;
 import burlap.visualizer.Visualizer;
+import compositeobject.CompObjDomain.GridWorldModel;
 
 public class CompObjDomain implements DomainGenerator {
 
@@ -444,7 +445,7 @@ public class CompObjDomain implements DomainGenerator {
 					return cos;
 				Block newBlock = new Block(ax, ay, "Block " + ax + ", " +  ay);
 				cos.addObject(newBlock);
-				//map[ax][ay] = 1;
+				map[ax][ay] = 1;
 				
 				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
@@ -454,7 +455,7 @@ public class CompObjDomain implements DomainGenerator {
 					return cos;
 				Door newDoor = new Door(ax, ay, "Door " + ax + ", " +  ay);
 				cos.addObject(newDoor);
-				//map[ax][ay] = 1;
+				map[ax][ay] = 1;
 				
 				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
@@ -483,6 +484,15 @@ public class CompObjDomain implements DomainGenerator {
 				return 5;
 			}
 			throw new RuntimeException("Unknown action " + name);
+		}
+		
+		public void makeEmptyMap(){
+			this.map = new int[map.length][map[0].length];
+			for(int i = 0; i < map.length; i++){
+				for(int j = 0; j < map[0].length; j++){
+					this.map[i][j] = 0;
+				}
+			}
 		}
 
 	}
@@ -616,7 +626,7 @@ public class CompObjDomain implements DomainGenerator {
 	
 	public static void main(String[] args) {
 		
-		CompObjDomain cod = new CompObjDomain(4, 4);
+		CompObjDomain cod = new CompObjDomain(3, 3);
 		
 		String outputPath = "output/";
 		
@@ -645,17 +655,18 @@ public class CompObjDomain implements DomainGenerator {
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
 
-			LearningAgent agent = new QLearning(d, 0.5, hashingFactory, 0., 1.);
+			LearningAgent agent = new QLearning(d, 0.99, hashingFactory, 0., .1);
 
-			//run learning for 50 episodes
-			for(int i = 0; i < 50; i++){
-				Episode e = agent.runLearningEpisode(env);
+			//run learning for 200 episodes
+			for(int i = 0; i < 200; i++){
+				Episode e = agent.runLearningEpisode(env, 200);
 
 				e.write(outputPath + "ql_" + i);
 				System.out.println(i + ": " + e.maxTimeStep());
 
 				//reset environment for next learning episode
 				env.resetEnvironment();
+				((GridWorldModel) ((FactoredModel)d.getModel()).getStateModel()).makeEmptyMap();
 			}
 			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
 			new EpisodeSequenceVisualizer(v, d, outputPath);

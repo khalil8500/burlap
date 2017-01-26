@@ -112,7 +112,12 @@ public class CompObjState implements MutableOOState {
 
 	@Override
 	public State copy() {
-		return new CompObjState(agent.copy(), (ArrayList<AtomicObject>) objects.clone());
+		ArrayList<AtomicObject> objectsCopy = new ArrayList<AtomicObject>();
+		for(AtomicObject a: objects)
+		{
+			objectsCopy.add(a.copy());
+		}
+		return new CompObjState(agent.copy(), objectsCopy);
 	}
 
 	@Override

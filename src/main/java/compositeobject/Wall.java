@@ -99,4 +99,9 @@ public class Wall {
 		return false;
 	}
 
+	public Wall copy() {
+		// TODO Auto-generated method stub
+		return new Wall(startX, startY, endX, endY, length, doors);
+	}
+
 }
