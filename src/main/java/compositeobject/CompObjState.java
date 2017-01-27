@@ -17,18 +17,19 @@ public class CompObjState implements MutableOOState {
 	
 	public CompObjAgent agent;
 	public ArrayList<AtomicObject> objects;
+	int [][] map;
 	
 	public CompObjState()
 	{
 		
 	}
 	
-	public CompObjState(int x, int y, AtomicObject...objects)
+	public CompObjState(int x, int y, int [][] map, AtomicObject...objects)
 	{
-		this(new CompObjAgent(x, y), objects);
+		this(new CompObjAgent(x, y), map, objects);
 	}
 	
-	public CompObjState(CompObjAgent agent, AtomicObject...objects)
+	public CompObjState(CompObjAgent agent, int [][] map, AtomicObject...objects)
 	{
 		this.agent = agent;
 		if(objects.length == 0){
@@ -37,12 +38,14 @@ public class CompObjState implements MutableOOState {
 		else {
 			this.objects = (ArrayList<AtomicObject>) Arrays.asList(objects);
 		}
+		this.map = map.clone();
 	}
 	
-	public CompObjState(CompObjAgent agent, ArrayList<AtomicObject> objects)
+	public CompObjState(CompObjAgent agent, int [][] map, ArrayList<AtomicObject> objects)
 	{
 		this.agent = agent;
 		this.objects = objects;
+		this.map = map.clone();
 	}
 
 	@Override
@@ -96,6 +99,11 @@ public class CompObjState implements MutableOOState {
 	public List<Object> variableKeys() {
 		return OOStateUtilities.flatStateKeys(this);
 	}
+	
+	public int[][] getMap()
+	{
+		return map;
+	}
 
 	@Override
 	public Object get(Object variableKey) {
@@ -115,9 +123,15 @@ public class CompObjState implements MutableOOState {
 		ArrayList<AtomicObject> objectsCopy = new ArrayList<AtomicObject>();
 		for(AtomicObject a: objects)
 		{
-			objectsCopy.add(a.copy());
+			objectsCopy.add(a.copyWithName(a.name()));
 		}
-		return new CompObjState(agent.copy(), objectsCopy);
+		int [][] newMap = new int[map.length][map[0].length];
+		for(int i = 0; i < map.length; i++){
+			for(int j = 0; j < map[0].length; j++){
+				newMap[i][j] = map[i][j];
+			}
+		}
+		return new CompObjState(agent.copyWithName(agent.name()), newMap, objectsCopy);
 	}
 
 	@Override
@@ -158,7 +172,7 @@ public class CompObjState implements MutableOOState {
 	}
 
 	public CompObjAgent touchAgent(){
-		this.agent = agent.copy();
+		this.agent = agent.copyWithName(agent.name());
 		return agent;
 	}
 
@@ -170,14 +184,14 @@ public class CompObjState implements MutableOOState {
 	public ArrayList<AtomicObject> deepTouchObjects(){
 		ArrayList<AtomicObject> nlocs = new ArrayList<AtomicObject>(objects.size());
 		for(AtomicObject loc : objects){
-			nlocs.add(loc.copy());
+			nlocs.add(loc.copyWithName(loc.name()));
 		}
 		objects = nlocs;
 		return objects;
 	}
 
 	public AtomicObject touchObject(int ind){
-		AtomicObject n = objects.get(ind).copy();
+		AtomicObject n = objects.get(ind).copyWithName(objects.get(ind).name());
 		touchObjects().remove(ind);
 		objects.add(ind, n);
 		return n;

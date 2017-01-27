@@ -15,11 +15,15 @@ import burlap.behavior.singleagent.auxiliary.EpisodeSequenceVisualizer;
 import burlap.behavior.singleagent.learning.LearningAgent;
 import burlap.behavior.singleagent.learning.tdmethods.QLearning;
 import burlap.behavior.singleagent.planning.Planner;
+import burlap.behavior.singleagent.planning.deterministic.DeterministicPlanner;
+import burlap.behavior.singleagent.planning.deterministic.uninformed.bfs.BFS;
 import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
 import burlap.debugtools.RandomFactory;
 import burlap.mdp.auxiliary.DomainGenerator;
 import burlap.mdp.auxiliary.common.NullTermination;
 import burlap.mdp.auxiliary.common.SinglePFTF;
+import burlap.mdp.auxiliary.stateconditiontest.StateConditionTest;
+import burlap.mdp.auxiliary.stateconditiontest.TFGoalCondition;
 import burlap.mdp.core.Domain;
 import burlap.mdp.core.StateTransitionProb;
 import burlap.mdp.core.TerminalFunction;
@@ -34,6 +38,7 @@ import burlap.mdp.singleagent.SADomain;
 import burlap.mdp.singleagent.common.SingleGoalPFRF;
 import burlap.mdp.singleagent.common.UniformCostRF;
 import burlap.mdp.singleagent.environment.SimulatedEnvironment;
+import burlap.mdp.singleagent.environment.extensions.EnvironmentObserver;
 import burlap.mdp.singleagent.model.FactoredModel;
 import burlap.mdp.singleagent.model.RewardFunction;
 import burlap.mdp.singleagent.model.statemodel.FullStateModel;
@@ -81,6 +86,8 @@ public class CompObjDomain implements DomainGenerator {
 	
 	public static final String ACTION_PLACEDOOR = "place door";
 	
+	public static final List<String> ACTIONS = Arrays.asList(ACTION_PLACEBLOCK, ACTION_PLACEDOOR); 
+	
 	public static final String PF_AreBarriers = "Are Barriers";
 	
 	public static final String PF_IsStraight = "Is Straight";
@@ -100,7 +107,7 @@ public class CompObjDomain implements DomainGenerator {
 	protected int desiredWallSize;
 
 	protected RewardFunction rf;
-	protected TerminalFunction tf;
+	protected static TerminalFunction tf;
 	
 	public CompObjDomain(int height, int width)
 	{
@@ -337,6 +344,8 @@ public class CompObjDomain implements DomainGenerator {
 
 		@Override
 		public List<StateTransitionProb> stateTransitions(State s, Action a) {
+			
+			s = s.copy();
 
 			double [] directionProbs = transitionDynamics[actionInd(a.actionName())];
 
@@ -347,8 +356,20 @@ public class CompObjDomain implements DomainGenerator {
 					continue; //cannot transition in this direction
 				}
 				State ns = s.copy();
-				int [] dcomps = movementDirectionFromIndex(i);
-				ns = move(ns, dcomps[0], dcomps[1]);
+				if(i < 4)
+				{
+					int [] dcomps = movementDirectionFromIndex(i);
+					ns = move(ns, dcomps[0], dcomps[1]);
+				}
+				else
+				{
+					move(s, ACTIONS.get(i-4));
+					CompObjState cos = (CompObjState)s;
+
+					int ax = cos.agent.x;
+					int ay = cos.agent.y;
+					//map[ax][ay] = 0;
+				}
 
 				//make sure this direction doesn't actually stay in the same place and replicate another no-op
 				boolean isNew = true;
@@ -410,6 +431,8 @@ public class CompObjDomain implements DomainGenerator {
 		protected State move(State s, int xd, int yd){
 
 			CompObjState cos = (CompObjState)s;
+			
+			int [][] map = (int[][]) cos.getMap();
 
 			int ax = cos.agent.x;
 			int ay = cos.agent.y;
@@ -418,7 +441,7 @@ public class CompObjDomain implements DomainGenerator {
 			int ny = ay+yd;
 
 			//hit wall, so do not change position
-			if(nx < 0 || nx >= map.length || ny < 0 || ny >= map[0].length || map[nx][ny] == 1 ||
+			if(nx < 0 || nx >= map.length || ny < 0 || ny >= map[0].length  ||
 					(xd > 0 && (map[ax][ay] == 3 || map[ax][ay] == 4)) || (xd < 0 && (map[nx][ny] == 3 || map[nx][ny] == 4)) ||
 					(yd > 0 && (map[ax][ay] == 2 || map[ax][ay] == 4)) || (yd < 0 && (map[nx][ny] == 2 || map[nx][ny] == 4)) ){
 				nx = ax;
@@ -432,9 +455,42 @@ public class CompObjDomain implements DomainGenerator {
 			return s;
 		}
 		
+		protected State move(State s, String a)
+		{
+			CompObjState cos = (CompObjState)s;
+			int [][] map = (int[][]) cos.getMap();
+
+			int ax = cos.agent.x;
+			int ay = cos.agent.y;
+			
+			if(a.equals(ACTION_PLACEBLOCK))
+			{
+				if(map[ax][ay] == 1)
+					return cos;
+				Block newBlock = new Block(ax, ay, "Block " + ax + ", " +  ay);
+				cos.addObject(newBlock);
+				map[ax][ay] = 1;
+				
+				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
+			}
+			else if(a.equals(ACTION_PLACEDOOR))
+			{
+				if(map[ax][ay] == 1)
+					return cos;
+				Door newDoor = new Door(ax, ay, "Door " + ax + ", " +  ay);
+				cos.addObject(newDoor);
+				map[ax][ay] = 1;
+				
+				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
+			}
+			return cos;
+		}
+		
 		protected State move(State s, Action a)
 		{
 			CompObjState cos = (CompObjState)s;
+			
+			int [][] map = (int[][]) cos.getMap();
 
 			int ax = cos.agent.x;
 			int ay = cos.agent.y;
@@ -622,6 +678,30 @@ public class CompObjDomain implements DomainGenerator {
 		
 	}
 	
+	public class CompObjSimEnvironment extends SimulatedEnvironment {
+
+		public CompObjSimEnvironment(SADomain domain, State initialState) {
+			super(domain, initialState);
+		}
+		
+		public void resetEnvironment() {
+			super.resetEnvironment();
+			/*for(int i = 0;i < height;i++)
+			{
+				for(int j = 0;j < width;j++)
+				{
+					map[i][j] = 0;
+				}
+			}*/
+		}
+		
+		public FactoredModel getModel()
+		{
+			return (FactoredModel) model;
+		}
+
+	}
+	
 	
 	
 	public static void main(String[] args) {
@@ -633,7 +713,7 @@ public class CompObjDomain implements DomainGenerator {
 		SADomain d = cod.generateDomain();
 		
 
-		CompObjState s = new CompObjState(new CompObjAgent(0, 0));
+		CompObjState s = new CompObjState(new CompObjAgent(0, 0), cod.map);
 		
 		int expMode = 0;
 		if(args.length > 0){
@@ -651,9 +731,23 @@ public class CompObjDomain implements DomainGenerator {
 			EnvironmentShell shell = new EnvironmentShell(d, s);
 			shell.start();
 			
-			SimulatedEnvironment env = new SimulatedEnvironment(d, s);
+			CompObjSimEnvironment env = cod.new CompObjSimEnvironment(d, s);
+			
+			StateConditionTest goalCondition = new TFGoalCondition(env.getModel().getTf());
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
+			
+			//Planner planner = new ValueIteration(d, 0.99, hashingFactory, 0.001, 100);
+			//Policy p = planner.planFromState(s);
+
+			//PolicyUtils.rollout(p, env, 100).write(outputPath + "vi");
+			
+			DeterministicPlanner planner = new BFS(d, goalCondition, hashingFactory);
+			Policy p = planner.planFromState(s);
+			//env.resetEnvironment();
+			PolicyUtils.rollout(p, s, d.getModel()).write(outputPath + "bfs");
+			
+			env.resetEnvironment();
 
 			LearningAgent agent = new QLearning(d, 0.99, hashingFactory, 0., .1);
 
@@ -666,7 +760,6 @@ public class CompObjDomain implements DomainGenerator {
 
 				//reset environment for next learning episode
 				env.resetEnvironment();
-				((GridWorldModel) ((FactoredModel)d.getModel()).getStateModel()).makeEmptyMap();
 			}
 			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
 			new EpisodeSequenceVisualizer(v, d, outputPath);
