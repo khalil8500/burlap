@@ -17,6 +17,7 @@ public class CompObjState implements MutableOOState {
 	
 	public CompObjAgent agent;
 	public ArrayList<AtomicObject> objects;
+	public AtomicObject [][] objectsMap;
 	int [][] map;
 	
 	public CompObjState()
@@ -38,6 +39,10 @@ public class CompObjState implements MutableOOState {
 		else {
 			this.objects = (ArrayList<AtomicObject>) Arrays.asList(objects);
 		}
+		for(AtomicObject o:objects)
+		{
+			objectsMap[(Integer)o.get(CompObjDomain.VAR_X)][(Integer)o.get(CompObjDomain.VAR_Y)] = o;
+		}
 		this.map = map.clone();
 	}
 	
@@ -46,6 +51,10 @@ public class CompObjState implements MutableOOState {
 		this.agent = agent;
 		this.objects = objects;
 		this.map = map.clone();
+		for(AtomicObject o:objects)
+		{
+			objectsMap[(Integer)o.get(CompObjDomain.VAR_X)][(Integer)o.get(CompObjDomain.VAR_Y)] = o;
+		}
 	}
 
 	@Override
@@ -178,6 +187,10 @@ public class CompObjState implements MutableOOState {
 
 	public ArrayList<AtomicObject> touchObjects(){
 		this.objects = new ArrayList<AtomicObject>(objects);
+		for(AtomicObject o:objects)
+		{
+			objectsMap[(Integer)o.get(CompObjDomain.VAR_X)][(Integer)o.get(CompObjDomain.VAR_Y)] = o;
+		}
 		return objects;
 	}
 	
@@ -187,6 +200,10 @@ public class CompObjState implements MutableOOState {
 			nlocs.add(loc.copyWithName(loc.name()));
 		}
 		objects = nlocs;
+		for(AtomicObject o:objects)
+		{
+			objectsMap[(Integer)o.get(CompObjDomain.VAR_X)][(Integer)o.get(CompObjDomain.VAR_Y)] = o;
+		}
 		return objects;
 	}
 
@@ -194,6 +211,7 @@ public class CompObjState implements MutableOOState {
 		AtomicObject n = objects.get(ind).copyWithName(objects.get(ind).name());
 		touchObjects().remove(ind);
 		objects.add(ind, n);
+		objectsMap[(Integer)n.get(CompObjDomain.VAR_X)][(Integer)n.get(CompObjDomain.VAR_Y)] = objects.get(ind);
 		return n;
 	}
 	@Override
@@ -205,6 +223,7 @@ public class CompObjState implements MutableOOState {
 
 		//copy on write
 		touchObjects().add(obj);
+		objectsMap[(Integer)obj.get(CompObjDomain.VAR_X)][(Integer)obj.get(CompObjDomain.VAR_Y)] = obj;
 
 		return this;
 	}
@@ -218,6 +237,8 @@ public class CompObjState implements MutableOOState {
 		if(ind == -1){
 			throw new RuntimeException("Cannot find object " + oname);
 		}
+
+		objectsMap[(Integer)objects.get(ind).get(CompObjDomain.VAR_X)][(Integer)objects.get(ind).get(CompObjDomain.VAR_Y)] = null;
 
 		//copy on write
 		touchObjects().remove(ind);
@@ -275,6 +296,12 @@ public class CompObjState implements MutableOOState {
 			}
 			selection.remove(objects.get(i));
 		}
+	}
+
+	public void removeObject(int x, int y)
+	{
+		AtomicObject temp = objectsMap[x][y];
+		removeObject(temp.name());
 	}
 
 }

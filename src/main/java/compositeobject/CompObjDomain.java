@@ -85,6 +85,8 @@ public class CompObjDomain implements DomainGenerator {
 	public static final String ACTION_PLACEBLOCK = "place block";
 	
 	public static final String ACTION_PLACEDOOR = "place door";
+
+	public static final String ACTION_REMOVEOJECT = "remove object";
 	
 	public static final List<String> ACTIONS = Arrays.asList(ACTION_PLACEBLOCK, ACTION_PLACEDOOR); 
 	
@@ -154,7 +156,7 @@ public class CompObjDomain implements DomainGenerator {
 	}
 	
 	public void setDeterministicTransitionDynamics(){
-		int na = 6;
+		int na = 7;
 		transitionDynamics = new double[na][na];
 		for(int i = 0; i < na; i++){
 			for(int j = 0; j < na; j++){
@@ -174,7 +176,7 @@ public class CompObjDomain implements DomainGenerator {
 	 * @param probSucceed probability to move the in intended direction
 	 */
 	public void setProbSucceedTransitionDynamics(double probSucceed){
-		int na = 4;
+		int na = 7;
 		double pAlt = (1.-probSucceed)/3.;
 		transitionDynamics = new double[na][na];
 		for(int i = 0; i < na; i++){
@@ -281,7 +283,8 @@ public class CompObjDomain implements DomainGenerator {
 				new UniversalActionType(ACTION_EAST),
 				new UniversalActionType(ACTION_WEST),
 				new UniversalActionType(ACTION_PLACEBLOCK),
-				new UniversalActionType(ACTION_PLACEDOOR));
+				new UniversalActionType(ACTION_PLACEDOOR),
+				new UniversalActionType(ACTION_REMOVEOJECT));
 		
 		return domain;
 	}
@@ -492,6 +495,8 @@ public class CompObjDomain implements DomainGenerator {
 			
 			int [][] map = (int[][]) cos.getMap();
 
+			cos.agent.clearWalls();
+
 			int ax = cos.agent.x;
 			int ay = cos.agent.y;
 			
@@ -538,6 +543,10 @@ public class CompObjDomain implements DomainGenerator {
 			else if(name.equals(ACTION_PLACEDOOR))
 			{
 				return 5;
+			}
+			else if(name.equals(ACTION_REMOVEOJECT))
+			{
+				return 6;
 			}
 			throw new RuntimeException("Unknown action " + name);
 		}
@@ -715,7 +724,7 @@ public class CompObjDomain implements DomainGenerator {
 
 		CompObjState s = new CompObjState(new CompObjAgent(0, 0), cod.map);
 		
-		int expMode = 0;
+		int expMode = 1;
 		if(args.length > 0){
 			if(args[0].equals("v")){
 				expMode = 1;
@@ -775,6 +784,7 @@ public class CompObjDomain implements DomainGenerator {
 			exp.addKeyAction("d", ACTION_EAST, "");
 			exp.addKeyAction("q", ACTION_PLACEBLOCK, "");
 			exp.addKeyAction("e", ACTION_PLACEDOOR, "");
+			exp.addKeyAction("r", ACTION_REMOVEOJECT, "");
 			
 			exp.initGUI();
 		}

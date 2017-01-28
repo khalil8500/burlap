@@ -153,4 +153,6 @@ public class CompObjAgent implements ObjectInstance{
 		walls.add(addition);
 	}
 
+
+
 }
