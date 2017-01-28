@@ -88,7 +88,7 @@ public class CompObjDomain implements DomainGenerator {
 
 	public static final String ACTION_REMOVEOJECT = "remove object";
 	
-	public static final List<String> ACTIONS = Arrays.asList(ACTION_PLACEBLOCK, ACTION_PLACEDOOR); 
+	public static final List<String> ACTIONS = Arrays.asList(ACTION_PLACEBLOCK, ACTION_PLACEDOOR, ACTION_REMOVEOJECT);
 	
 	public static final String PF_AreBarriers = "Are Barriers";
 	
@@ -730,7 +730,7 @@ public class CompObjDomain implements DomainGenerator {
 
 		CompObjState s = new CompObjState(new CompObjAgent(0, 0), cod.map);
 		
-		int expMode = 1;
+		int expMode = 0;
 		if(args.length > 0){
 			if(args[0].equals("v")){
 				expMode = 1;
@@ -754,12 +754,8 @@ public class CompObjDomain implements DomainGenerator {
 
 			cod.CompObjBFS(d, goalCondition, hashingFactory, s, outputPath);
 
-			//env.resetEnvironment();
-			//Planner planner = new ValueIteration(d, 0.99, hashingFactory, 0.001, 100);
-			//Policy p = planner.planFromState(s);
+			env.resetEnvironment();
 
-			//PolicyUtils.rollout(p, env, 100).write(outputPath + "vi");
-			
 			cod.CompObjQLearning(d, hashingFactory, env, outputPath, 100, 0.99, 1, 0.1, 200);
 
 			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
