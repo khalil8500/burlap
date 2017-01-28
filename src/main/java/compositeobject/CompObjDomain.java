@@ -706,15 +706,15 @@ public class CompObjDomain implements DomainGenerator {
 	
 	public static void main(String[] args) {
 		
-		CompObjDomain cod = new CompObjDomain(3, 3);
-		
+		CompObjDomain cod = new CompObjDomain(5, 5);
+
 		String outputPath = "output/";
-		
+
 		SADomain d = cod.generateDomain();
-		
+
 
 		CompObjState s = new CompObjState(new CompObjAgent(0, 0), cod.map);
-		
+
 		int expMode = 0;
 		if(args.length > 0){
 			if(args[0].equals("v")){
@@ -724,7 +724,7 @@ public class CompObjDomain implements DomainGenerator {
 				expMode = 0;
 			}
 		}
-		
+
 		
 				
 		if(expMode == 0){
@@ -736,31 +736,17 @@ public class CompObjDomain implements DomainGenerator {
 			StateConditionTest goalCondition = new TFGoalCondition(env.getModel().getTf());
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
-			
+
+			cod.CompObjBFS(d, goalCondition, hashingFactory, s, outputPath);
+
+			//env.resetEnvironment();
 			//Planner planner = new ValueIteration(d, 0.99, hashingFactory, 0.001, 100);
 			//Policy p = planner.planFromState(s);
 
 			//PolicyUtils.rollout(p, env, 100).write(outputPath + "vi");
 			
-			DeterministicPlanner planner = new BFS(d, goalCondition, hashingFactory);
-			Policy p = planner.planFromState(s);
-			//env.resetEnvironment();
-			PolicyUtils.rollout(p, s, d.getModel()).write(outputPath + "bfs");
-			
-			env.resetEnvironment();
+			cod.CompObjQLearning(d, hashingFactory, env, outputPath, 100, 0.99, 1, 0.1, 200);
 
-			LearningAgent agent = new QLearning(d, 0.99, hashingFactory, 0., .1);
-
-			//run learning for 200 episodes
-			for(int i = 0; i < 200; i++){
-				Episode e = agent.runLearningEpisode(env, 200);
-
-				e.write(outputPath + "ql_" + i);
-				System.out.println(i + ": " + e.maxTimeStep());
-
-				//reset environment for next learning episode
-				env.resetEnvironment();
-			}
 			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
 			new EpisodeSequenceVisualizer(v, d, outputPath);
 			
@@ -779,6 +765,29 @@ public class CompObjDomain implements DomainGenerator {
 			exp.initGUI();
 		}
 		
+	}
+
+	public void CompObjBFS(SADomain d, StateConditionTest goalCondition, HashableStateFactory hashingFactory, CompObjState s, String outputPath)
+	{
+		DeterministicPlanner planner = new BFS(d, goalCondition, hashingFactory);
+		Policy p = planner.planFromState(s);
+		PolicyUtils.rollout(p, s, d.getModel()).write(outputPath + "bfs");
+	}
+
+	public void CompObjQLearning(SADomain d, HashableStateFactory hashingFactory, SimulatedEnvironment env, String outputPath, int iterations, double gamma, double qinit, double learningRate, int maxSteps)
+	{
+		LearningAgent agent = new QLearning(d, gamma, hashingFactory, qinit, learningRate);
+
+		//run learning for 200 episodes
+		for(int i = 0; i < iterations; i++){
+			Episode e = agent.runLearningEpisode(env, maxSteps);
+
+			e.write(outputPath + "ql_" + i);
+			System.out.println(i + ": " + e.maxTimeStep());
+
+			//reset environment for next learning episode
+			env.resetEnvironment();
+		}
 	}
 
 }
