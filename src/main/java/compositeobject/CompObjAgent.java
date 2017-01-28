@@ -32,7 +32,7 @@ public class CompObjAgent implements ObjectInstance{
 	
 	public CompObjAgent(int x, int y, ArrayList<Wall> walls)
 	{
-		this(x,y);
+		this(x, y);
 		this.walls = walls;
 	}
 	
@@ -44,8 +44,7 @@ public class CompObjAgent implements ObjectInstance{
 	
 	public CompObjAgent(int x, int y, String name)
 	{
-		this.x = x;
-		this.y = y;
+		this(x, y);
 		this.name = name;
 	}
 	
