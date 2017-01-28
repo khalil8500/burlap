@@ -520,6 +520,12 @@ public class CompObjDomain implements DomainGenerator {
 				
 				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
 			}
+			else if(a.actionName().equals(ACTION_REMOVEOJECT))
+			{
+				cos.removeObject(ax, ay);
+				map[ax][ay] = 0;
+				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject> ());
+			}
 			return cos;
 		}
 

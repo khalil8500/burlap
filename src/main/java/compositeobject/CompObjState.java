@@ -39,6 +39,7 @@ public class CompObjState implements MutableOOState {
 		else {
 			this.objects = (ArrayList<AtomicObject>) Arrays.asList(objects);
 		}
+		objectsMap = new AtomicObject[map.length][map[0].length];
 		for(AtomicObject o:objects)
 		{
 			objectsMap[(Integer)o.get(CompObjDomain.VAR_X)][(Integer)o.get(CompObjDomain.VAR_Y)] = o;
@@ -51,6 +52,7 @@ public class CompObjState implements MutableOOState {
 		this.agent = agent;
 		this.objects = objects;
 		this.map = map.clone();
+		objectsMap = new AtomicObject[map.length][map[0].length];
 		for(AtomicObject o:objects)
 		{
 			objectsMap[(Integer)o.get(CompObjDomain.VAR_X)][(Integer)o.get(CompObjDomain.VAR_Y)] = o;
@@ -301,6 +303,8 @@ public class CompObjState implements MutableOOState {
 	public void removeObject(int x, int y)
 	{
 		AtomicObject temp = objectsMap[x][y];
+		if(temp == null)
+			return;
 		removeObject(temp.name());
 	}
 
