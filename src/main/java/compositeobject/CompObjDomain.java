@@ -17,7 +17,9 @@ import burlap.behavior.singleagent.learning.tdmethods.QLearning;
 import burlap.behavior.singleagent.planning.Planner;
 import burlap.behavior.singleagent.planning.deterministic.DeterministicPlanner;
 import burlap.behavior.singleagent.planning.deterministic.uninformed.bfs.BFS;
+import burlap.behavior.singleagent.planning.stochastic.rtdp.RTDP;
 import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
+import burlap.behavior.valuefunction.ValueFunction;
 import burlap.debugtools.RandomFactory;
 import burlap.mdp.auxiliary.DomainGenerator;
 import burlap.mdp.auxiliary.common.NullTermination;
@@ -599,6 +601,7 @@ public class CompObjDomain implements DomainGenerator {
 		public boolean isTrue(OOState s, String... params) {
 			ObjectInstance agent = s.object(params[0]);
 			ArrayList<AtomicObject> selection = (ArrayList<AtomicObject>) agent.get("selection");
+			Collections.sort(selection);
 			if(selection.size() <= 1)
 				return true;
 			//double slope = Math.abs(((Double)selection.get(1).get(VAR_X) - (Double)selection.get(0).get(VAR_X))/((Double)selection.get(1).get(VAR_Y) - (Double)selection.get(0).get(VAR_Y)));
@@ -614,10 +617,10 @@ public class CompObjDomain implements DomainGenerator {
 					double tempDy = (Integer)a.get(VAR_Y)-initialY;
 					if(dx != 0)
 					{
-						double slope = Math.abs(dy/dx);
+						double slope = dy/dx;
 						if(tempDx != 0)
 						{
-							double compSlope = Math.abs(tempDy/tempDx);
+							double compSlope = tempDy/tempDx;
 							if(compSlope != slope)
 								return false;
 						}
@@ -745,18 +748,76 @@ public class CompObjDomain implements DomainGenerator {
 		if(expMode == 0){
 			EnvironmentShell shell = new EnvironmentShell(d, s);
 			shell.start();
-			
+
 			CompObjSimEnvironment env = cod.new CompObjSimEnvironment(d, s);
 			
 			StateConditionTest goalCondition = new TFGoalCondition(env.getModel().getTf());
+
+			ValueFunction vf = new ValueFunction() {
+				@Override
+				public double value(State s) {
+					CompObjAgent a = (CompObjAgent) ((CompObjState) s).objectsOfClass(CLASS_AGENT).get(0);
+					List<Wall> walls = a.walls;
+					int size1, size2, size3;
+					size1 = size2 = size3 = 0;
+					for(Wall w:walls)
+					{
+						if(w.length() == 1)
+						{
+							size1++;
+						}
+						else if(w.length() == 2) {
+							//size1 = true;
+							size2++;
+						}
+						else if(w.length() >= 3){
+							//size1 = true;
+							//size2 = true;
+							size3++;
+						}
+					}
+					int size1Walls, size2Walls, size3Walls;
+					size1Walls = size2Walls = size3Walls = 0;
+					if(size1 > 3)
+						 size1Walls = 10 - (size1 - 3) * 10;
+					else if(size1 <= 3 && size1 != 0)
+						size1Walls = 10;
+					if(size2 > 2)
+						size2Walls = 100 - (size2 - 2) * 100;
+					else if(size2 <= 2 && size2 != 0)
+						size2Walls = 100;
+					if(size3 == 1)
+						size3Walls = 1000;
+					return size1Walls + size2Walls + size3Walls - 1;
+				}
+			};
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
 
-			cod.CompObjBFS(d, goalCondition, hashingFactory, s, outputPath);
+			Planner planner = new RTDP(d, 0.99, hashingFactory, vf, 20, 0.01, 100);
 
-			env.resetEnvironment();
+			Policy p  = planner.planFromState(s);
 
-			cod.CompObjQLearning(d, hashingFactory, env, outputPath, 100, 0.99, 1, 0.1, 200);
+			Episode e1 = PolicyUtils.rollout(p, s, d.getModel());
+			e1.write(outputPath + "RTDP Small");
+
+			planner = new RTDP(d, 0.99, hashingFactory, vf, 100, 0.01, 100);
+
+			p  = planner.planFromState(s);
+
+			Episode e2;
+
+			e2 = PolicyUtils.rollout(p, s, d.getModel());
+			e2.write(outputPath + "RTDP Large");
+
+			System.out.println("RTDP Small: " + e1.discountedReturn(.99));
+			System.out.println("RTDP Large: " + e2.discountedReturn(.99));
+
+			//cod.CompObjBFS(d, goalCondition, hashingFactory, s, outputPath);
+
+			//env.resetEnvironment();
+
+			//cod.CompObjQLearning(d, hashingFactory, env, outputPath, 100, 0.99, 1, 0.1, 200);
 
 			Visualizer v = CompObjVisualizer.getVisualizer(cod.getMap());
 			new EpisodeSequenceVisualizer(v, d, outputPath);
