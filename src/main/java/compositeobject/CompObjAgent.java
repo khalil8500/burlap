@@ -6,7 +6,6 @@ import java.util.List;
 
 import burlap.mdp.core.oo.state.OOStateUtilities;
 import burlap.mdp.core.oo.state.ObjectInstance;
-import burlap.mdp.core.state.State;
 
 public class CompObjAgent implements ObjectInstance{
 	
@@ -141,7 +140,7 @@ public class CompObjAgent implements ObjectInstance{
 	public void map(List<AtomicObject> selection)
 	{
 
-		Wall addition =  MapToWallComp.Map(selection);
+		Wall addition =  MapToWall.Map(selection);
 		
 		for(Wall w:walls)
 		{

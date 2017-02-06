@@ -3,12 +3,12 @@ package compositeobject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapToWallComp {
+public class MapToWall {
 	
 	public static Wall Map(List<AtomicObject> components)
 	{
 		int startX, startY, endX, endY;
-		List<AtomicObject> doors = new ArrayList<AtomicObject>();
+		ArrayList<AtomicObject> doors = new ArrayList<AtomicObject>();
 		startX = startY = endX = endY = -1;
 		for(AtomicObject a: components)
 		{

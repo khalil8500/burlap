@@ -13,10 +13,10 @@ import static compositeobject.CompObjDomain.VAR_Y;
 /**
  * Created by khalil8500 on 2/6/2017.
  */
-public class isContiguous extends PropositionalFunction
+public class IsContiguous extends PropositionalFunction
 {
 
-    public isContiguous(String name, String[] parameterClasses) {
+    public IsContiguous(String name, String[] parameterClasses) {
         super(name, parameterClasses);
     }
 

@@ -286,11 +286,11 @@ public class CompObjState implements MutableOOState {
 			agent.setSelection(selection);
 			checkForWalls(s, i + 1, end, selection);
 			//CompObjDomain.AreBarriers ar = new CompObjDomain.AreBarriers(CompObjDomain.PF_AreBarriers, new String[]{CompObjDomain.CLASS_AGENT});
-			if(pfs.get(0).isTrue(s, "agent"))
+			if((new AreBarriers(CompObjDomain.PF_AreBarriers, new String[] {CompObjDomain.CLASS_AGENT})).isTrue(s, "agent"))
 			{
-				if(pfs.get(1).isTrue(s, "agent"))
+				if((new IsStraight(CompObjDomain.PF_IsStraight, new String[] {CompObjDomain.CLASS_AGENT})).isTrue(s, "agent"))
 				{
-					if(pfs.get(2).isTrue(s, "agent"))
+					if((new IsContiguous(CompObjDomain.PF_IsContiguous, new String[] {CompObjDomain.CLASS_AGENT})).isTrue(s, "agent"))
 					{
 						agent.map(selection);
 					}

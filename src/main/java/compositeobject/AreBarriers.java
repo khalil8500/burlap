@@ -4,35 +4,25 @@ import burlap.mdp.core.oo.propositional.PropositionalFunction;
 import burlap.mdp.core.oo.state.OOState;
 import burlap.mdp.core.oo.state.ObjectInstance;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by khalil8500 on 2/6/2017.
  */
-public class hasSizeWall extends PropositionalFunction
-{
-    int wallSize;
-
-    public hasSizeWall(String name, String[] parameterClasses, int size) {
+public class AreBarriers extends PropositionalFunction {
+    public AreBarriers(String name, String[] parameterClasses) {
         super(name, parameterClasses);
-        wallSize = size;
     }
 
     @Override
     public boolean isTrue(OOState s, String... params) {
         ObjectInstance agent = s.object(params[0]);
-        List<Wall> walls = (List<Wall>) agent.get("Walls");
-
-        for(Wall w: walls)
-        {
-            if(w.length() >= wallSize)
-                return true;
+        ArrayList<AtomicObject> selection = ((CompObjAgent) agent).getSelection();
+        for (AtomicObject a : selection) {
+            if (a.className() != "Atomic Object")
+                return false;
         }
-
-        return false;
+        return true;
     }
-
-
-
 }
 

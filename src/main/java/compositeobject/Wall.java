@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Wall {
 	
-	private List<AtomicObject> doors = new ArrayList<AtomicObject>();
+	private ArrayList<AtomicObject> doors = new ArrayList<AtomicObject>();
 	private int startX, startY, endX, endY, length;
 	
 	public Wall()
@@ -25,7 +25,7 @@ public class Wall {
 		this.length = length;
 	}
 	
-	public Wall(int startX, int startY, int endX, int endY, int length, List<AtomicObject> doors)
+	public Wall(int startX, int startY, int endX, int endY, int length, ArrayList<AtomicObject> doors)
 	{
 		this.startX = startX;
 		this.startY = startY;
@@ -85,7 +85,7 @@ public class Wall {
 		endY = y;
 	}
 	
-	public void setDoors(List<AtomicObject> doors)
+	public void setDoors(ArrayList<AtomicObject> doors)
 	{
 		this.doors = doors;
 	}
@@ -101,7 +101,7 @@ public class Wall {
 
 	public Wall copy() {
 		// TODO Auto-generated method stub
-		return new Wall(startX, startY, endX, endY, length, doors);
+		return new Wall(startX, startY, endX, endY, length, (ArrayList<AtomicObject>)doors.clone());
 	}
 
 }

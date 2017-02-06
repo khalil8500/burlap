@@ -1,16 +1,13 @@
 package compositeobject;
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import burlap.behavior.policy.Policy;
 import burlap.behavior.policy.PolicyUtils;
 import burlap.behavior.singleagent.Episode;
-import burlap.behavior.singleagent.MDPSolverInterface;
 import burlap.behavior.singleagent.auxiliary.EpisodeSequenceVisualizer;
 import burlap.behavior.singleagent.learning.LearningAgent;
 import burlap.behavior.singleagent.learning.tdmethods.QLearning;
@@ -18,29 +15,23 @@ import burlap.behavior.singleagent.planning.Planner;
 import burlap.behavior.singleagent.planning.deterministic.DeterministicPlanner;
 import burlap.behavior.singleagent.planning.deterministic.uninformed.bfs.BFS;
 import burlap.behavior.singleagent.planning.stochastic.rtdp.RTDP;
-import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
 import burlap.behavior.valuefunction.ValueFunction;
 import burlap.debugtools.RandomFactory;
 import burlap.mdp.auxiliary.DomainGenerator;
-import burlap.mdp.auxiliary.common.NullTermination;
 import burlap.mdp.auxiliary.common.SinglePFTF;
 import burlap.mdp.auxiliary.stateconditiontest.StateConditionTest;
 import burlap.mdp.auxiliary.stateconditiontest.TFGoalCondition;
-import burlap.mdp.core.Domain;
 import burlap.mdp.core.StateTransitionProb;
 import burlap.mdp.core.TerminalFunction;
 import burlap.mdp.core.action.Action;
 import burlap.mdp.core.action.UniversalActionType;
 import burlap.mdp.core.oo.OODomain;
 import burlap.mdp.core.oo.propositional.PropositionalFunction;
-import burlap.mdp.core.oo.state.OOState;
 import burlap.mdp.core.oo.state.ObjectInstance;
 import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.SADomain;
 import burlap.mdp.singleagent.common.SingleGoalPFRF;
-import burlap.mdp.singleagent.common.UniformCostRF;
 import burlap.mdp.singleagent.environment.SimulatedEnvironment;
-import burlap.mdp.singleagent.environment.extensions.EnvironmentObserver;
 import burlap.mdp.singleagent.model.FactoredModel;
 import burlap.mdp.singleagent.model.RewardFunction;
 import burlap.mdp.singleagent.model.statemodel.FullStateModel;
@@ -50,7 +41,6 @@ import burlap.shell.visual.VisualExplorer;
 import burlap.statehashing.HashableStateFactory;
 import burlap.statehashing.simple.SimpleHashableStateFactory;
 import burlap.visualizer.Visualizer;
-import compositeobject.CompObjDomain.GridWorldModel;
 
 public class CompObjDomain implements DomainGenerator {
 
@@ -238,10 +228,10 @@ public class CompObjDomain implements DomainGenerator {
 
 	public List<PropositionalFunction> generatePfs() {
 		List<PropositionalFunction> pfs = Arrays.asList(
-				new areBarriers(PF_AreBarriers, new String[]{CLASS_AGENT}),
-				new isStraight(PF_IsStraight, new String[]{CLASS_AGENT}),
-				new isContiguous(PF_IsContiguous, new String[]{CLASS_AGENT}),
-				new hasSizeWall(PF_hasSizeWall, new String[]{CLASS_AGENT}, desiredWallSize)
+				new AreBarriers(PF_AreBarriers, new String[]{CLASS_AGENT}),
+				new IsStraight(PF_IsStraight, new String[]{CLASS_AGENT}),
+				new IsContiguous(PF_IsContiguous, new String[]{CLASS_AGENT}),
+				new HasSizeWall(PF_hasSizeWall, new String[]{CLASS_AGENT}, desiredWallSize)
 		);
 		return pfs;
 	}

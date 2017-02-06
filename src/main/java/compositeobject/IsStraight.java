@@ -13,10 +13,10 @@ import static compositeobject.CompObjDomain.VAR_Y;
 /**
  * Created by khalil8500 on 2/6/2017.
  */
-public class isStraight extends PropositionalFunction
+public class IsStraight extends PropositionalFunction
 {
 
-    public isStraight(String name, String[] parameterClasses) {
+    public IsStraight(String name, String[] parameterClasses) {
         super(name, parameterClasses);
     }
 
