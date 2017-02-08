@@ -300,6 +300,11 @@ public class CompObjState implements MutableOOState {
 		}
 	}
 
+	public void checkForRooms(CompObjState s, int start, int end, ArrayList<Wall> walls)
+	{
+
+	}
+
 	public void removeObject(int x, int y)
 	{
 		AtomicObject temp = objectsMap[x][y];
