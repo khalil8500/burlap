@@ -3,49 +3,52 @@ package compositeobject;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MapToWall {
 	
 	public static Wall Map(List<AtomicObject> components)
 	{
-		int startX, startY, endX, endY;
+		Point start, end;
+		start = new Point(-1,-1);
+		end = new Point(-1,-1);
 		ArrayList<AtomicObject> doors = new ArrayList<AtomicObject>();
-		startX = startY = endX = endY = -1;
+
 		for(AtomicObject a: components)
 		{
 			int x = (Integer) a.get(CompObjDomain.VAR_X);
 			int y = (Integer) a.get(CompObjDomain.VAR_Y);
-			if(startX == -1)
+			if(start.getX() == -1)
 			{
-				startX = x;
-				startY = y;
-				endX = x;
-				endY = y;
+				start.setX(x);
+				start.setY(y);
+				end.setX(x);
+				end.setY(y);
 			}
 			else{
-				if(startX == x)
+				if(start.getX() == x)
 				{
-					if(startY > y)
+					if(start.getY() > y)
 					{
-						startY = y;
+						start.setY(y);
 					}
 				}
-				else if(startX > x)
+				else if(start.getX() > x)
 				{
-					startX = x;
-					startY = y;
+					start.setX(x);
+					start.setY(y);
 				}
 				
-				if(endX == x)
+				if(end.getX() == x)
 				{
-					if(endY < y)
+					if(end.getY() < y)
 					{
-						endY = y;
+						end.setY(y);
 					}
 				}
-				else if(endX < x)
+				else if(end.getX() < x)
 				{
-					endX = x;
-					endY = y;
+					end.setX(x);
+					end.setY(y);
 				}
 			}
 			
@@ -54,7 +57,7 @@ public class MapToWall {
 				doors.add(a);
 			}
 		}
-		return new Wall(startX, startY, endX, endY, components.size(), doors);
+		return new Wall(start, end, components.size(), doors);
 	}
 
 }
