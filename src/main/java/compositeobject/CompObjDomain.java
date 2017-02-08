@@ -603,27 +603,24 @@ public class CompObjDomain implements DomainGenerator {
 							size1++;
 						}
 						else if(w.length() == 2) {
-							//size1 = true;
 							size2++;
 						}
 						else if(w.length() >= 3){
-							//size1 = true;
-							//size2 = true;
 							size3++;
 						}
 					}
 					int size1Walls, size2Walls, size3Walls;
 					size1Walls = size2Walls = size3Walls = 0;
 					if(size1 > 3)
-						 size1Walls = 10 - (size1 - 3) * 10;
+						 size1Walls = - (size1 - 3) * 100;
 					else if(size1 <= 3 && size1 != 0)
 						size1Walls = 10;
 					if(size2 > 2)
-						size2Walls = 100 - (size2 - 2) * 100;
+						size2Walls = - (size2 - 2) * 1000;
 					else if(size2 <= 2 && size2 != 0)
 						size2Walls = 100;
 					if(size3 == 1)
-						size3Walls = 1000;
+						size3Walls = 10000;
 					return size1Walls + size2Walls + size3Walls - 1;
 				}
 			};
