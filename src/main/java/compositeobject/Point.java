@@ -1,9 +1,12 @@
+
 package compositeobject;
 
+import java.util.Comparator;
+
 /**
- * Created by khalil8500 on 2/8/2017.
+ * Created by birdm on 2/8/2017.
  */
-public class Point{
+public class Point {
     private int x, y;
 
     public Point()
@@ -34,4 +37,15 @@ public class Point{
     {
         this.y = y;
     }
+
+    public boolean equals(Object o){
+        if(o instanceof Point){
+            Point x = (Point)o;
+            if(this.getX()==x.getX() && this.getY()==x.getY()){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

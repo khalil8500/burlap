@@ -6,53 +6,77 @@ import java.util.List;
 public class Wall {
 	
 	private ArrayList<AtomicObject> doors = new ArrayList<AtomicObject>();
-	private int startX, startY, endX, endY, length;
+	private Point start, end;
+	private int length;
 	
 	public Wall()
 	{
-		startX = -1;
-		startY = -1;
-		endX = -1;
-		endY = -1;
+		this.start = new Point(-1,-1);
+		this.end = new Point(-1,-1);
 	}
 	
 	public Wall(int startX, int startY, int endX, int endY, int length)
 	{
-		this.startX = startX;
-		this.startY = startY;
-		this.endX = endX;
-		this.endY = endY;
+		this.start = new Point(startX,startY);
+		this.end = new Point(endX,endY);
 		this.length = length;
 	}
 	
 	public Wall(int startX, int startY, int endX, int endY, int length, ArrayList<AtomicObject> doors)
 	{
-		this.startX = startX;
-		this.startY = startY;
-		this.endX = endX;
-		this.endY = endY;
+		this.start = new Point(startX,startY);
+		this.end = new Point(endX,endY);
+		this.length = length;
 		this.doors = doors;
+	}
+
+	public Wall(Point start, Point end, int length)
+	{
+		this.start = start;
+		this.end = end;
 		this.length = length;
 	}
-	
+
+	public Wall(Point start, Point end, int length, ArrayList<AtomicObject> doors)
+	{
+		this.start = start;
+		this.end = end;
+		this.length = length;
+		this.doors = doors;
+	}
+
+	public Point getPoint(int i)
+	{
+		if(i == 0)
+			return start;
+		if(i == 1)
+			return end;
+		return null;
+	}
+	public Point getStart(){ return start;}
+
+	public Point getEnd(){
+		return end;
+	}
+
 	public int getStartX()
 	{
-		return startX;
+		return start.getX();
 	}
 	
 	public int getStartY()
 	{
-		return startY;
+		return start.getY();
 	}
 	
 	public int getEndX()
 	{
-		return endX;
+		return end.getX();
 	}
 	
 	public int getEndY()
 	{
-		return endY;
+		return end.getY();
 	}
 	
 	public int length()
@@ -65,24 +89,21 @@ public class Wall {
 		return doors;
 	}
 	
-	public void setStartX(int x)
-	{
-		startX = x;
-	}
+	public void setStartX(int x) {	start.setX(x);	}
 	
 	public void setStartY(int y)
 	{
-		startY = y;
+		start.setY(y);
 	}
 	
 	public void setEndX(int x)
 	{
-		endX = x;
+		end.setX(x);
 	}
 	
 	public void setEndY(int y)
 	{
-		endY = y;
+		end.setY(y);
 	}
 	
 	public void setDoors(ArrayList<AtomicObject> doors)
@@ -93,15 +114,15 @@ public class Wall {
 	public boolean equals(Object o)
 	{
 		Wall w = (Wall)o;
-		if(w.getStartX() == startX && w.getEndX() == endX 
-				&& w.getStartY() == startY && w.getEndY() == endY)
+		if(w.getStartX() == start.getX() && w.getEndX() == end.getX()
+				&& w.getStartY() == start.getY() && w.getEndY() == end.getY())
 			return true;
 		return false;
 	}
 
 	public Wall copy() {
 		// TODO Auto-generated method stub
-		return new Wall(startX, startY, endX, endY, length, (ArrayList<AtomicObject>)doors.clone());
+		return new Wall(start.getX(), start.getY(), end.getX(), end.getY(), length, (ArrayList<AtomicObject>)doors.clone());
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class Room {
 
+
     ArrayList<Point> corners;
     ArrayList<Door> doors;
 
