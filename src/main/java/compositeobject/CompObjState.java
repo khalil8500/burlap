@@ -18,7 +18,7 @@ public class CompObjState implements MutableOOState {
 	public CompObjAgent agent;
 	public ArrayList<AtomicObject> objects;
 	public AtomicObject [][] objectsMap;
-	int [][] map;
+	public int [][] map;
 	
 	public CompObjState()
 	{

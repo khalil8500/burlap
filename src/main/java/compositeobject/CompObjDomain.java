@@ -587,7 +587,7 @@ public class CompObjDomain implements DomainGenerator {
 
 			CompObjSimEnvironment env = cod.new CompObjSimEnvironment(d, s);
 			
-			StateConditionTest goalCondition = new TFGoalCondition(env.getModel().getTf());
+			//StateConditionTest goalCondition = new TFGoalCondition(env.getModel().getTf());
 
 			ValueFunction vf = new ValueFunction() {
 				@Override
@@ -612,15 +612,15 @@ public class CompObjDomain implements DomainGenerator {
 					int size1Walls, size2Walls, size3Walls;
 					size1Walls = size2Walls = size3Walls = 0;
 					if(size1 > 3)
-						 size1Walls = - (size1 - 3) * 100;
+						 size1Walls = - (size1 - 3) * 1;
 					else if(size1 <= 3 && size1 != 0)
-						size1Walls = 10;
+						size1Walls = 3;
 					if(size2 > 2)
-						size2Walls = - (size2 - 2) * 1000;
+						size2Walls = - (size2 - 2) * 2;
 					else if(size2 <= 2 && size2 != 0)
-						size2Walls = 100;
+						size2Walls = 4;
 					if(size3 == 1)
-						size3Walls = 10000;
+						size3Walls = 20;
 					return size1Walls + size2Walls + size3Walls - 1;
 				}
 			};
