@@ -250,7 +250,7 @@ public class CompObjDomain implements DomainGenerator {
 
 		GridWorldModel smodel = new GridWorldModel(cmap, getTransitionDynamics());
 
-		RewardFunction rf = new SingleGoalPFRF(domain.propFunction(PF_hasSizeWall), 1000, -1);
+		RewardFunction rf = new SingleGoalPFRF(domain.propFunction(PF_hasSizeWall), 100, -1);
 		TerminalFunction tf = new SinglePFTF(domain.propFunction(PF_hasSizeWall));
 
 		/*if(rf == null){
@@ -627,14 +627,14 @@ public class CompObjDomain implements DomainGenerator {
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
 
-			Planner planner = new RTDP(d, 0.99, hashingFactory, vf, 20, 0.01, 100);
+			Planner planner = new RTDP(d, 0.99, hashingFactory, 0, 100, 0.0001, 100);
 
 			Policy p  = planner.planFromState(s);
 
 			Episode e1 = PolicyUtils.rollout(p, s, d.getModel());
 			e1.write(outputPath + "RTDP Small");
 
-			planner = new RTDP(d, 0.99, hashingFactory, vf, 100, 0.01, 100);
+			planner = new RTDP(d, 0.99, hashingFactory, 0, 1000, 0.0001, 100);
 
 			p  = planner.planFromState(s);
 

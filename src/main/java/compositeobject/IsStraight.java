@@ -34,7 +34,7 @@ public class IsStraight extends PropositionalFunction
         double dy = (Integer)selection.get(1).get(VAR_Y) - initialY;
         for(AtomicObject a:selection)
         {
-            if((Integer)a.get(VAR_X) != initialX && (Integer)a.get(VAR_Y) != initialY)
+            if((Integer)a.get(VAR_X) != initialX || (Integer)a.get(VAR_Y) != initialY)
             {
                 double tempDx = (Integer)a.get(VAR_X)-initialX;
                 double tempDy = (Integer)a.get(VAR_Y)-initialY;

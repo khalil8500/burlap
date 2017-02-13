@@ -18,7 +18,7 @@ public class IsAccessible extends PropositionalFunction {
     public boolean isTrue(OOState s, String... params) {
         CompObjAgent agent = (CompObjAgent) s.object(params[0]);
         ArrayList<Wall> walls = (ArrayList<Wall>)agent.get("Walls");
-        AtomicObject [][] map = ((CompObjState)s).getMap();
+        AtomicObject [][] map = ((CompObjState)s).getObjectsMap();
         for(Wall w: walls)
         {
             ArrayList<AtomicObject> doors = (ArrayList<AtomicObject>) w.getDoors();
