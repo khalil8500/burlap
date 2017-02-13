@@ -111,9 +111,9 @@ public class CompObjState implements MutableOOState {
 		return OOStateUtilities.flatStateKeys(this);
 	}
 	
-	public int[][] getMap()
+	public AtomicObject[][] getMap()
 	{
-		return map;
+		return objectsMap;
 	}
 
 	@Override
