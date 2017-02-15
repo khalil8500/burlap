@@ -449,8 +449,10 @@ public class CompObjDomain implements DomainGenerator {
 			int ay = cos.agent.y;
 
 			if (a.equals(ACTION_PLACEBLOCK)) {
-				if (map[ax][ay] == 1)
+				if (map[ax][ay] == 1) {
+					cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
 					return cos;
+				}
 				Block newBlock = new Block(ax, ay, "Block " + ax + ", " + ay);
 				cos.addObject(newBlock);
 				map[ax][ay] = 1;
@@ -458,7 +460,10 @@ public class CompObjDomain implements DomainGenerator {
 				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
 			} else if (a.equals(ACTION_PLACEDOOR)) {
 				if (map[ax][ay] == 1)
+				{
+					cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
 					return cos;
+				}
 				Door newDoor = new Door(ax, ay, "Door " + ax + ", " + ay);
 				cos.addObject(newDoor);
 				map[ax][ay] = 1;
