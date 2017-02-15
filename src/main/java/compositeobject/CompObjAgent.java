@@ -146,6 +146,8 @@ public class CompObjAgent implements ObjectInstance{
 	{
 		walls.clear();
 	}
+
+	public void clearRooms(){ rooms.clear(); }
 	
 	public ArrayList<AtomicObject> getSelection()
 	{
@@ -162,7 +164,7 @@ public class CompObjAgent implements ObjectInstance{
 		return OOStateUtilities.objectInstanceToString(this);
 	}
 	
-	public void map(List<AtomicObject> selection)
+	public void mapToWall(List<AtomicObject> selection)
 	{
 
 		Wall addition =  MapToWall.Map(selection);
@@ -174,6 +176,17 @@ public class CompObjAgent implements ObjectInstance{
 		}
 		
 		walls.add(addition);
+	}
+
+	public void mapToRoom(List<Wall> selection)
+	{
+		Room addition = MapToRoom.Map(selection);
+		for(Room r:rooms)
+		{
+			if(r.equals(addition))
+				return;
+		}
+		rooms.add(addition);
 	}
 
 

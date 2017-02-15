@@ -10,14 +10,16 @@ import java.util.ArrayList;
  */
 public class IsAccessible extends PropositionalFunction {
 
-    public IsAccessible(String name, String[] parameterClasses) {
+    ArrayList<Wall> walls;
+
+    public IsAccessible(String name, String[] parameterClasses, ArrayList<Wall> walls) {
         super(name, parameterClasses);
+        this.walls = walls;
     }
 
     @Override
     public boolean isTrue(OOState s, String... params) {
-        CompObjAgent agent = (CompObjAgent) s.object(params[0]);
-        ArrayList<Wall> walls = (ArrayList<Wall>)agent.get("Walls");
+        //CompObjAgent agent = (CompObjAgent) s.object(params[0]);
         AtomicObject [][] map = ((CompObjState)s).getObjectsMap();
         for(Wall w: walls)
         {

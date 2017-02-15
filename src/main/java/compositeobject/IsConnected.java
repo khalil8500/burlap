@@ -11,14 +11,15 @@ import java.util.ArrayList;
  */
 public class IsConnected extends PropositionalFunction {
 
-    public IsConnected(String name, String[] parameterClasses) {
+    ArrayList<Wall> walls;
+    public IsConnected(String name, String[] parameterClasses, ArrayList<Wall> walls) {
         super(name, parameterClasses);
+        this.walls = walls;
     }
 
     @Override
     public boolean isTrue(OOState s, String... params) {
         CompObjAgent agent = (CompObjAgent) s.object(params[0]);
-        ArrayList<Wall> walls = (ArrayList<Wall>)agent.get("Walls");
         Wall cur = walls.get(0);
         int wallNum = 0;
         int lastCorner, traversed;
