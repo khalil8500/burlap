@@ -13,6 +13,7 @@ public class CompObjAgent implements ObjectInstance{
 	protected String name;
 	protected ArrayList<AtomicObject> selection;
 	protected ArrayList<Wall> walls;
+	protected ArrayList<Room> rooms;
 	private final static List<Object> keys = Arrays.<Object>asList(CompObjDomain.VAR_X, CompObjDomain.VAR_Y);
 	
 	public CompObjAgent()
@@ -20,6 +21,7 @@ public class CompObjAgent implements ObjectInstance{
 		name = "agent";
 		selection = new ArrayList<AtomicObject>();
 		walls = new ArrayList<Wall>();
+		rooms = new ArrayList<Room>();
 	}
 	
 	public CompObjAgent(int x, int y)
@@ -34,11 +36,23 @@ public class CompObjAgent implements ObjectInstance{
 		this(x, y);
 		this.walls = walls;
 	}
+
+	public CompObjAgent(int x, int y, ArrayList<Wall> walls, ArrayList<Room> rooms)
+	{
+		this(x, y, walls);
+		this.rooms = rooms;
+	}
 	
 	public CompObjAgent(int x, int y, String name, ArrayList<Wall> walls)
 	{
 		this(x, y, name);
 		this.walls = walls;
+	}
+
+	public CompObjAgent(int x, int y, String name, ArrayList<Wall> walls, ArrayList<Room> rooms)
+	{
+		this(x, y, name, walls);
+		this.rooms = rooms;
 	}
 	
 	public CompObjAgent(int x, int y, String name)
@@ -70,18 +84,24 @@ public class CompObjAgent implements ObjectInstance{
 			return walls;
 		else if(key.equals("selection"))
 			return selection;
-
+		else if(key.equals("Rooms"))
+			return rooms;
 		throw new RuntimeException("Unknown key " + key);
 	}
 
 	@Override
 	public CompObjAgent copy() {
 		ArrayList<Wall> wallsCopy = new ArrayList<Wall>();
+		ArrayList<Room> roomsCopy = new ArrayList<Room>();
 		for(Wall w: walls)
 		{
 			wallsCopy.add(w.copy());
 		}
-		return new CompObjAgent(x, y, wallsCopy);
+		for(Room r: rooms)
+		{
+			roomsCopy.add(r.copy());
+		}
+		return new CompObjAgent(x, y, wallsCopy, roomsCopy);
 	}
 
 	@Override
@@ -97,11 +117,16 @@ public class CompObjAgent implements ObjectInstance{
 	@Override
 	public CompObjAgent copyWithName(String objectName) {
 		ArrayList<Wall> wallsCopy = new ArrayList<Wall>();
+		ArrayList<Room> roomsCopy = new ArrayList<Room>();
 		for(Wall w: walls)
 		{
 			wallsCopy.add(w.copy());
 		}
-		return new CompObjAgent(x, y, name, wallsCopy);
+		for(Room r: rooms)
+		{
+			roomsCopy.add(r.copy());
+		}
+		return new CompObjAgent(x, y, name, wallsCopy, roomsCopy);
 	}
 	
 	public String getName() {
