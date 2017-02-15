@@ -142,9 +142,12 @@ public class CompObjState implements MutableOOState {
 			objectsCopy.add(a.copyWithName(a.name()));
 		}
 		int [][] newMap = new int[map.length][map[0].length];
+		AtomicObject [][] newObjectsMap = new AtomicObject[map.length][map[0].length];
 		for(int i = 0; i < map.length; i++){
 			for(int j = 0; j < map[0].length; j++){
 				newMap[i][j] = map[i][j];
+				if(objectsMap[i][j] != null)
+					newObjectsMap[i][j] = objectsMap[i][j].copy();
 			}
 		}
 		return new CompObjState(agent.copyWithName(agent.name()), newMap, objectsCopy);
@@ -231,6 +234,7 @@ public class CompObjState implements MutableOOState {
 		//copy on write
 		touchObjects().add(obj);
 		objectsMap[(Integer)obj.get(CompObjDomain.VAR_X)][(Integer)obj.get(CompObjDomain.VAR_Y)] = obj;
+		map[(Integer)obj.get(CompObjDomain.VAR_X)][(Integer)obj.get(CompObjDomain.VAR_Y)] = 1;
 
 		return this;
 	}
@@ -245,9 +249,9 @@ public class CompObjState implements MutableOOState {
 			throw new RuntimeException("Cannot find object " + oname);
 		}
 
-		objectsMap[(Integer)objects.get(ind).get(CompObjDomain.VAR_X)][(Integer)objects.get(ind).get(CompObjDomain.VAR_Y)] = null;
-
 		//copy on write
+		objectsMap[(Integer)objects.get(ind).get(CompObjDomain.VAR_X)][(Integer)objects.get(ind).get(CompObjDomain.VAR_Y)] = null;
+		map[(Integer)objects.get(ind).get(CompObjDomain.VAR_X)][(Integer)objects.get(ind).get(CompObjDomain.VAR_Y)] = 0;
 		touchObjects().remove(ind);
 
 		return this;
@@ -282,8 +286,8 @@ public class CompObjState implements MutableOOState {
 	
 	public void checkForWalls(CompObjState s, int start, int end, ArrayList<AtomicObject> selection)
 	{
-		CompObjDomain temp = new CompObjDomain(1, 1);
-		List<PropositionalFunction> pfs = temp.generatePfs();
+		//CompObjDomain temp = new CompObjDomain(1, 1);
+		//List<PropositionalFunction> pfs = temp.generatePfs();
 		//List<ObjectInstance> objects = s.objectsOfClass(CompObjDomain.CLASS_ATOMICOBJECT);
 		for(int i = start;i < end; i++)
 		{
@@ -297,17 +301,31 @@ public class CompObjState implements MutableOOState {
 				{
 					if((new IsContiguous(CompObjDomain.PF_IsContiguous, new String[] {CompObjDomain.CLASS_AGENT})).isTrue(s, "agent"))
 					{
-						agent.map(selection);
+						if(selection.size() >= 3)
+							agent.mapToWall(selection);
 					}
 				}
 			}
 			selection.remove(objects.get(i));
+			agent.setSelection(selection);
 		}
 	}
 
-	public void checkForRooms(CompObjState s, int start, int end, ArrayList<Wall> walls)
+	public void checkForRooms(CompObjState s, int start, int end, ArrayList<Wall> wallsSellection, ArrayList<Wall> walls)
 	{
-
+		for(int i = start;i < end; i++)
+		{
+			wallsSellection.add(walls.get(i));
+			checkForRooms(s, i + 1, end, wallsSellection, walls);
+			if(new IsConnected("IsConnected", new String[] {CompObjDomain.CLASS_AGENT}, wallsSellection).isTrue(s,"agent"))
+			{
+				if(new IsAccessible("IsConnected", new String[] {CompObjDomain.CLASS_AGENT}, wallsSellection).isTrue(s,"agent"))
+				{
+					agent.mapToRoom(wallsSellection);
+				}
+			}
+			wallsSellection.remove(walls.get(i));
+		}
 	}
 
 	public void removeObject(int x, int y)

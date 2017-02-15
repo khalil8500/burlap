@@ -27,6 +27,7 @@ import burlap.mdp.core.action.Action;
 import burlap.mdp.core.action.UniversalActionType;
 import burlap.mdp.core.oo.OODomain;
 import burlap.mdp.core.oo.propositional.PropositionalFunction;
+import burlap.mdp.core.oo.state.OOState;
 import burlap.mdp.core.oo.state.ObjectInstance;
 import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.SADomain;
@@ -88,7 +89,9 @@ public class CompObjDomain implements DomainGenerator {
 
 	public static final String PF_IsContiguous = "Is Contiguous";
 
-	public static final String PF_hasSizeWall = "Has Size Wall";
+	public static final String PF_HasSizeWall = "Has Size Wall";
+
+	public static final String PF_HasSizeRoom = "Has Size Room";
 
 	protected int height;
 
@@ -99,6 +102,8 @@ public class CompObjDomain implements DomainGenerator {
 	protected double[][] transitionDynamics;
 
 	protected int desiredWallSize;
+
+	protected int desiredRoomSize;
 
 	protected RewardFunction rf;
 	protected static TerminalFunction tf;
@@ -231,7 +236,8 @@ public class CompObjDomain implements DomainGenerator {
 				new AreBarriers(PF_AreBarriers, new String[]{CLASS_AGENT}),
 				new IsStraight(PF_IsStraight, new String[]{CLASS_AGENT}),
 				new IsContiguous(PF_IsContiguous, new String[]{CLASS_AGENT}),
-				new HasSizeWall(PF_hasSizeWall, new String[]{CLASS_AGENT}, desiredWallSize)
+				new HasSizeWall(PF_HasSizeWall, new String[]{CLASS_AGENT}, desiredWallSize),
+				new HasSizeRoom(PF_HasSizeRoom, new String[]{CLASS_AGENT}, desiredRoomSize)
 		);
 		return pfs;
 	}
@@ -242,6 +248,8 @@ public class CompObjDomain implements DomainGenerator {
 
 		desiredWallSize = 3;
 
+		desiredRoomSize = 9;
+
 		OODomain.Helper.addPfsToDomain(domain, this.generatePfs());
 
 		int[][] cmap = this.getMap();
@@ -250,8 +258,9 @@ public class CompObjDomain implements DomainGenerator {
 
 		GridWorldModel smodel = new GridWorldModel(cmap, getTransitionDynamics());
 
-		RewardFunction rf = new SingleGoalPFRF(domain.propFunction(PF_hasSizeWall), 100, -1);
-		TerminalFunction tf = new SinglePFTF(domain.propFunction(PF_hasSizeWall));
+		//RewardFunction rf = new SingleGoalPFRF(domain.propFunction(PF_hasSizeWall), 100, -1);
+		RewardFunction rf = new CompObjRewardFunction(-1, -5, -10, 100, 1000);
+		TerminalFunction tf = new SinglePFTF(domain.propFunction(PF_HasSizeRoom));
 
 		/*if(rf == null){
 			rf = new UniformCostRF();
@@ -458,6 +467,7 @@ public class CompObjDomain implements DomainGenerator {
 				map[ax][ay] = 1;
 
 				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+				cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 			} else if (a.equals(ACTION_PLACEDOOR)) {
 				if (map[ax][ay] == 1)
 				{
@@ -469,6 +479,7 @@ public class CompObjDomain implements DomainGenerator {
 				map[ax][ay] = 1;
 
 				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+				cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 			}
 			return cos;
 		}
@@ -491,6 +502,7 @@ public class CompObjDomain implements DomainGenerator {
 				map[ax][ay] = 1;
 
 				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+				cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 			} else if (a.actionName().equals(ACTION_PLACEDOOR)) {
 				if (map[ax][ay] == 1)
 					return cos;
@@ -499,10 +511,12 @@ public class CompObjDomain implements DomainGenerator {
 				map[ax][ay] = 1;
 
 				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+				cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 			} else if (a.actionName().equals(ACTION_REMOVEOJECT)) {
 				cos.removeObject(ax, ay);
 				map[ax][ay] = 0;
 				cos.checkForWalls(cos, 0, ((List<ObjectInstance>) cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+				cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 			}
 			return cos;
 		}
@@ -560,6 +574,61 @@ public class CompObjDomain implements DomainGenerator {
 		}
 
 	}
+
+	public class CompObjRewardFunction implements RewardFunction
+	{
+
+		int stepVal, blockVal, doorVal, wallVal, roomVal;
+
+		public CompObjRewardFunction(int stepVal, int blockVal, int doorVal, int wallVal, int roomVal)
+		{
+			this.stepVal = stepVal;
+			this.blockVal = blockVal;
+			this.doorVal = doorVal;
+			this.wallVal = wallVal;
+			this.roomVal = roomVal;
+		}
+
+		@Override
+		public double reward(State s, Action a, State sprime) {
+			int val = 0;
+			HasSizeRoom hsrPF = new HasSizeRoom(PF_HasSizeRoom, new String[]{CLASS_AGENT}, desiredRoomSize);
+			HasSizeWall hswPF = new HasSizeWall(PF_HasSizeWall, new String[]{CLASS_AGENT}, desiredWallSize);
+
+			if(a.actionName() == ACTION_PLACEBLOCK)
+				val += blockVal;
+
+			else if(a.actionName() == ACTION_PLACEDOOR)
+				val += doorVal;
+
+			if(hswPF.isTrue((OOState)sprime, "agent"))
+			{
+				int init = 0;
+				int end = 0;
+
+				for(Wall w: ((CompObjState)s).agent.walls)
+				{
+					if(w.length() == desiredWallSize)
+						init++;
+				}
+
+				for(Wall w: ((CompObjState)sprime).agent.walls)
+				{
+					if(w.length() == desiredWallSize)
+						end++;
+				}
+
+				val += (end - init)*wallVal;
+			}
+
+			if(hsrPF.isTrue((OOState)sprime, "agent"))
+				val += roomVal;
+
+			if(val != 0)
+				return val;
+			return stepVal;
+		}
+	}
 	
 	
 	
@@ -574,7 +643,7 @@ public class CompObjDomain implements DomainGenerator {
 
 		CompObjState s = new CompObjState(new CompObjAgent(0, 0), cod.map);
 		
-		int expMode = 0;
+		int expMode = 1;
 		if(args.length > 0){
 			if(args[0].equals("v")){
 				expMode = 1;
@@ -632,14 +701,14 @@ public class CompObjDomain implements DomainGenerator {
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
 
-			Planner planner = new RTDP(d, 0.99, hashingFactory, 0, 100, 0.0001, 100);
+			Planner planner = new RTDP(d, 0.99, hashingFactory, 0, 100, 0.0001, 500);
 
 			Policy p  = planner.planFromState(s);
 
 			Episode e1 = PolicyUtils.rollout(p, s, d.getModel());
 			e1.write(outputPath + "RTDP Small");
 
-			planner = new RTDP(d, 0.99, hashingFactory, 0, 1000, 0.0001, 100);
+			planner = new RTDP(d, 0.99, hashingFactory, 0, 1000, 0.0001, 500);
 
 			p  = planner.planFromState(s);
 

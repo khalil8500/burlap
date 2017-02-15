@@ -23,4 +23,10 @@ public class Door extends AtomicObject{
 		type = 1;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if((x == ((AtomicObject)obj).x) && (y == ((AtomicObject)obj).y))
+			return true;
+		return false;
+	}
 }
