@@ -319,7 +319,7 @@ public class CompObjState implements MutableOOState {
 			checkForRooms(s, i + 1, end, wallsSellection, walls);
 			if(new IsConnected("IsConnected", new String[] {CompObjDomain.CLASS_AGENT}, wallsSellection).isTrue(s,"agent"))
 			{
-				if(new IsAccessible("IsConnected", new String[] {CompObjDomain.CLASS_AGENT}, wallsSellection).isTrue(s,"agent"))
+				if(new IsAccessible("IsAccessible", new String[] {CompObjDomain.CLASS_AGENT}, wallsSellection).isTrue(s,"agent"))
 				{
 					agent.mapToRoom(wallsSellection);
 				}

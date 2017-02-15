@@ -37,19 +37,21 @@ public class IsConnected extends PropositionalFunction {
                         traversed++;
                         cur = next;
                         changed = true;
+                        wallNum = i;
                         break;
                     } else if (next.getPoint(1).equals(cur.getPoint(1 - lastCorner))) {
                         lastCorner = 1;
                         traversed++;
                         cur = next;
                         changed = true;
+                        wallNum = i;
                         break;
                     }
                 }
             }
             if(!changed)
                 return false;
-        }while(cur.getPoint(lastCorner).equals(initCorner));
+        }while(!cur.getPoint(lastCorner).equals(initCorner));
 
         if(traversed == walls.size())
         {

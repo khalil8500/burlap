@@ -490,13 +490,17 @@ public class CompObjDomain implements DomainGenerator {
 			int[][] map = (int[][]) cos.getMap();
 
 			cos.agent.clearWalls();
+			cos.agent.clearRooms();
 
 			int ax = cos.agent.x;
 			int ay = cos.agent.y;
 
 			if (a.actionName().equals(ACTION_PLACEBLOCK)) {
-				if (map[ax][ay] == 1)
+				if (map[ax][ay] == 1) {
+					cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+					cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 					return cos;
+				}
 				Block newBlock = new Block(ax, ay, "Block " + ax + ", " + ay);
 				cos.addObject(newBlock);
 				map[ax][ay] = 1;
@@ -504,8 +508,11 @@ public class CompObjDomain implements DomainGenerator {
 				cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
 				cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 			} else if (a.actionName().equals(ACTION_PLACEDOOR)) {
-				if (map[ax][ay] == 1)
+				if (map[ax][ay] == 1) {
+					cos.checkForWalls(cos, 0, (cos.objectsOfClass(CLASS_ATOMICOBJECT)).size(), new ArrayList<AtomicObject>());
+					cos.checkForRooms(cos, 0, (cos.agent.walls.size()), new ArrayList<Wall>(), cos.agent.walls);
 					return cos;
+				}
 				Door newDoor = new Door(ax, ay, "Door " + ax + ", " + ay);
 				cos.addObject(newDoor);
 				map[ax][ay] = 1;
