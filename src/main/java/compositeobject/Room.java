@@ -10,15 +10,15 @@ public class Room {
 
 
     ArrayList<Point> corners;
-    ArrayList<Door> doors;
+    ArrayList<AtomicObject> doors;
 
     public Room()
     {
         corners = new ArrayList<Point>();
-        doors = new ArrayList<Door>();
+        doors = new ArrayList<AtomicObject>();
     }
 
-    public Room(ArrayList<Point> corners, ArrayList<Door> doors) {
+    public Room(ArrayList<Point> corners, ArrayList<AtomicObject> doors) {
         this.corners = corners;
         this.doors = doors;
     }
@@ -33,19 +33,19 @@ public class Room {
         this.corners = corners;
     }
 
-    public ArrayList<Door> getDoors()
+    public ArrayList<AtomicObject> getDoors()
     {
         return doors;
     }
 
-    public void setDoors(ArrayList<Door> doors)
+    public void setDoors(ArrayList<AtomicObject> doors)
     {
         this.doors = doors;
     }
 
     public Room copy()
     {
-        return new Room((ArrayList<Point>)corners.clone(), (ArrayList<Door>)doors.clone());
+        return new Room((ArrayList<Point>)corners.clone(), (ArrayList<AtomicObject>)doors.clone());
     }
 
     @Override
@@ -65,10 +65,10 @@ public class Room {
                 return false;
         }
 
-        for(Door d: doors)
+        for(AtomicObject d: doors)
         {
             boolean found = false;
-            for(Door dComp: comp.doors)
+            for(AtomicObject dComp: comp.doors)
             {
                 if(d.equals(dComp)) {
                     found = true;

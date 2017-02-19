@@ -708,14 +708,14 @@ public class CompObjDomain implements DomainGenerator {
 			
 			HashableStateFactory hashingFactory = new SimpleHashableStateFactory();
 
-			Planner planner = new RTDP(d, 0.99, hashingFactory, 0, 100, 0.0001, 500);
+			Planner planner = new RTDP(d, 0.99, hashingFactory, 0, 20, 0.0001, 500);
 
 			Policy p  = planner.planFromState(s);
 
 			Episode e1 = PolicyUtils.rollout(p, s, d.getModel());
 			e1.write(outputPath + "RTDP Small");
 
-			planner = new RTDP(d, 0.99, hashingFactory, 0, 1000, 0.0001, 500);
+			planner = new RTDP(d, 0.99, hashingFactory, 0, 100, 0.0001, 500);
 
 			p  = planner.planFromState(s);
 
@@ -723,6 +723,7 @@ public class CompObjDomain implements DomainGenerator {
 
 			e2 = PolicyUtils.rollout(p, s, d.getModel());
 			e2.write(outputPath + "RTDP Large");
+
 
 			System.out.println("RTDP Small: " + e1.discountedReturn(.99));
 			System.out.println("RTDP Large: " + e2.discountedReturn(.99));

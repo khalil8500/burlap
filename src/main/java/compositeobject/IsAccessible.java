@@ -20,7 +20,7 @@ public class IsAccessible extends PropositionalFunction {
     @Override
     public boolean isTrue(OOState s, String... params) {
         //CompObjAgent agent = (CompObjAgent) s.object(params[0]);
-        AtomicObject [][] map = ((CompObjState)s).getObjectsMap();
+        int [][] map = ((CompObjState)s).getMap();
         for(Wall w: walls)
         {
             ArrayList<AtomicObject> doors = (ArrayList<AtomicObject>) w.getDoors();
@@ -32,19 +32,19 @@ public class IsAccessible extends PropositionalFunction {
                 int y = (Integer)d.get(CompObjDomain.VAR_Y);
                 if(dX == 0)
                 {
-                    if(x - 1 >= 0 && x + 1 < map.length && map[x-1][y] == null && map[x+1][y] == null)
+                    if(x - 1 >= 0 && x + 1 < map.length && map[x-1][y] == 0 && map[x+1][y] == 0)
                         return true;
                 }
                 else if(dY == 0)
                 {
-                    if(y - 1 >= 0 && y + 1 < map[0].length && map[x][y-1] == null && map[x][y+1] == null)
+                    if(y - 1 >= 0 && y + 1 < map[0].length && map[x][y-1] == 0 && map[x][y+1] == 0)
                         return true;
                 }
                 else
                 {
-                    if(x - 1 >= 0 && x + 1 < map.length && map[x-1][y] == null && map[x+1][y] == null)
+                    if(x - 1 >= 0 && x + 1 < map.length && map[x-1][y] == 0 && map[x+1][y] == 0)
                         return true;
-                    if(y - 1 >= 0 && y + 1 < map[0].length && map[x][y-1] == null && map[x][y+1] == null)
+                    if(y - 1 >= 0 && y + 1 < map[0].length && map[x][y-1] == 0 && map[x][y+1] == 0)
                         return true;
                 }
             }

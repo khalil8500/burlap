@@ -11,7 +11,7 @@ public class MapToRoom {
     public static Room Map(List<Wall> components)
     {
         ArrayList<Point> corners = new ArrayList<Point>();
-        ArrayList<Door> doors = new ArrayList<Door>();
+        ArrayList<AtomicObject> doors = new ArrayList<AtomicObject>();
         for(Wall w:components){
             if(!corners.contains(w.getStart())){
                 corners.add(w.getStart());
@@ -20,7 +20,7 @@ public class MapToRoom {
                 corners.add(w.getEnd());
             }
             for(AtomicObject d:w.getDoors()){
-                doors.add((Door)d);
+                doors.add(d);
             }
         }
 

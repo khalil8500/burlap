@@ -52,7 +52,7 @@ public class MapToWall {
 				}
 			}
 			
-			if(a.className() == "Door")
+			if(a.type == 1)
 			{
 				doors.add(a);
 			}
